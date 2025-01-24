@@ -96,6 +96,27 @@ class StaticTartanStateEvaluatorTest {
     }
 
     @Test
+    @DisplayName("R4: If the alarm is enabled and the house gets suddenly occupied, then sound the alarm.")
+    void alarmSoundsWhenHouseGetsOccupiedAndAlarmIsEnabledTest() {
+
+        // Initialize all state variables
+        inState.put(IoTValues.ALARM_STATE, true);       // Alarm is enabled
+        inState.put(IoTValues.PROXIMITY_STATE, false); // House is unoccupied
+        inState.put(IoTValues.ALARM_ACTIVE, false);    // Alarm is not sounding
+
+        // Act: Simulate the house becoming occupied
+        inState.put(IoTValues.PROXIMITY_STATE, true); // Someone is detected
+        Map<String, Object> resultState = evaluator.evaluateState(inState, log);
+
+        // Assert: Verify that the alarm is sounding
+        assertTrue((Boolean) resultState.get(IoTValues.ALARM_ACTIVE), "Alarm should sound when the house becomes occupied while the alarm is enabled");
+
+        // Check that the log contains the correct information
+        String logContent = log.toString();
+        assertTrue(logContent.contains("Break in detected: Activating alarm"), "Log should record that the alarm was activated due to proximity detection");
+    }
+
+    @Test
     @DisplayName("R5: If the house is empty, then start the away timer.")
     void awayTimerStartsWhenHouseIsEmptyTest() {
 
@@ -133,25 +154,5 @@ class StaticTartanStateEvaluatorTest {
         assertTrue(logContent.contains("Away timer expired: closing door"), "Log should record door being closed");
     }
 
-//    @Test
-//    @DisplayName("R4: If the alarm is enabled and the house gets suddenly occupied, then sound the alarm.")
-//    void alarmSoundsWhenHouseGetsOccupiedAndAlarmIsEnabledTest() {
-//
-//        // Initialize all state variables
-//        inState.put(IoTValues.ALARM_STATE, true);       // Alarm is enabled
-//        inState.put(IoTValues.PROXIMITY_STATE, false); // House is unoccupied
-//        inState.put(IoTValues.ALARM_ACTIVE, false);    // Alarm is not sounding
-//
-//        // Act: Simulate the house becoming occupied
-//        inState.put(IoTValues.PROXIMITY_STATE, true); // Someone is detected
-//        Map<String, Object> resultState = evaluator.evaluateState(inState, log);
-//
-//        // Assert: Verify that the alarm is sounding
-//        assertTrue((Boolean) resultState.get(IoTValues.ALARM_ACTIVE), "Alarm should sound when the house becomes occupied while the alarm is enabled");
-//
-//        // Check that the log contains the correct information
-//        String logContent = log.toString();
-//        assertTrue(logContent.contains("Break in detected: Activating alarm"), "Log should record that the alarm was activated due to proximity detection");
-//    }
 }
 
