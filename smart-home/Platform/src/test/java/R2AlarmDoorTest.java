@@ -8,7 +8,7 @@ import tartan.smarthome.resources.iotcontroller.IoTControlManager;
 import java.util.Map;
 import java.util.Hashtable;
 
-class IoTControlManagerTest {
+class R2AlarmDoorTest {
 
     private IoTControlManager controlManager;
 
