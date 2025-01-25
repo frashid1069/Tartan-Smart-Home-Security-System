@@ -21,7 +21,7 @@ services:
   mysql-container:
     build: Database/
     ports:
-     - "3306:3306"
+     - "3309:3309"
     volumes:
      - mysql-storage:/var/lib/mysql
 

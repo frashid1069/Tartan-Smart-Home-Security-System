@@ -132,8 +132,11 @@ public class StaticTartanStateEvaluator implements TartanStateEvaluator {
         // Auto lock the house
         if (awayTimerState == true) {
             lightState = false;
+            log.append(formatLogEntry("Away timer expired: turning off lights"));
             doorState = false;
+            log.append(formatLogEntry("Away timer expired: arming alarm"));
             alarmState = true;
+            log.append(formatLogEntry("Away timer expired: closing door"));
             awayTimerState = false;
         }
 
@@ -146,7 +149,11 @@ public class StaticTartanStateEvaluator implements TartanStateEvaluator {
                 lightState = true;
                 log.append(formatLogEntry("Turning on light"));
             }
-            
+
+        } else {
+            // The house is empty, start the away timer
+            awayTimerState = true;
+            log.append(formatLogEntry("Away timer started because house is empty"));
         }
 
         // set the alarm

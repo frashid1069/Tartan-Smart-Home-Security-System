@@ -1,3 +1,15 @@
+# Group 13 - Lab H01
+## Members:
+
+#### Armaan Das (adas5)
+
+#### Farhan Rashid (frashid2)
+
+#### Lingfeng Zhu (lingfen1)
+
+#### Michael Shi (wenjian2)
+
+
 # tartan
 
 The Tartan SmartHome Platform
