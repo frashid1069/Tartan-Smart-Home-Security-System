@@ -16,18 +16,19 @@ class HouseState(object):
       '''
       self.__door = True
       self.__light = True
-      self.__proximity = True
+      self.__proximity = False
       self.__alarm_active = False
       self.__alarm_state = False
-      self.__heater_state = True
-      self.__heater_state = True
       self.__chiller_state = False
       self.__dehumidifier = False
       self.__heater_state = False
-      self.__chiller_state = False
+      self.__intruder_state = False
+      self.__phone_proximity = False
       self.__temperature = 65
       self.__humidity = 90
       self.__hvac_mode = HEATER
+      self.__door_lock = False
+
 
       self.__param = ";"
       self.__end = "."
@@ -67,6 +68,9 @@ class HouseState(object):
          elif k == "DS":
             if v == "1": self.__door = True
             else: self.__door = False
+         elif k == "DLS":
+            if v == "1": self.__door_lock = True
+            else: self.__door_lock = False
          elif k == "HUS":
             if v == "1": self.__dehumidifier = True
             else: self.__dehumidifier = False
@@ -82,6 +86,12 @@ class HouseState(object):
          elif k == "HM":
             if v == "1": self.__hvac_mode = HEATER
             else: self.__hvac_mode = CHILLER
+         elif k == "IS":
+            if v == "1": self.__intruder_state = True
+            else: self.__intruder_state = False
+         elif k == "PP":
+            if v == "1": self.__phone_proximity = True
+            else: self.__phone_proximity = False
 
    # Getters and setters for house properties
    def get_temperature(self): return self.__temperature
@@ -91,6 +101,11 @@ class HouseState(object):
    def set_door(self, d): self.__door = d
    def get_door(self):
       if self.__door: return "1"
+      return "0"
+
+   def set_door_lock(self, dl): self.__door_lock = dl
+   def get_door_lock(self):
+      if self.__door_lock: return "1"
       return "0"
 
    def set_light(self, l): self.__light = l
@@ -128,16 +143,29 @@ class HouseState(object):
       if self.__hvac_mode == HEATER: return "1"
       return "0"
 
+   def set_intruder_state(self, h): self.__intruder_state = h
+   def get_intruder_state(self):
+      if self.__intruder_state: return "1"
+      return "0"
+
    def set_dehumidifier(self, h): self.__dehumidifier = h
    def get_dehumidifier(self):
       if self.__dehumidifier: return "1"
+      return "0"
+
+   def set_phone_proximity(self, p):
+      self.__phone_proximity = p
+
+   def get_phone_proximity(self):
+      if self.__phone_proximity:
+         return "1"
       return "0"
 
    def get_state(self):
       '''
       Handle get state requests
       '''
-      return "TR={0};HR={1};DS={2};LS={3};PS={4};AS={5};AA={6};HES={7};CHS={8};HM={9};HUS={10}".format(self.get_temperature(),
+      return "TR={0};HR={1};DS={2};LS={3};PS={4};AS={5};AA={6};HES={7};CHS={8};HM={9};HUS={10};IS={11};PP={12};DLS={13}".format(self.get_temperature(),
                                                                                                self.get_humidity(),
                                                                                                self.get_door(),
                                                                                                self.get_light(),
@@ -147,7 +175,10 @@ class HouseState(object):
                                                                                                self.get_heater_state(),
                                                                                                self.get_chiller_state(),
                                                                                                self.get_hvac_mode(),
-                                                                                               self.get_dehumidifier())
+                                                                                               self.get_dehumidifier(),
+                                                                                               self.get_intruder_state(),
+                                                                                               self.get_phone_proximity(),
+                                                                                               self.get_door_lock())
 house = HouseState()
 
 class UserThread(threading.Thread):
@@ -182,6 +213,10 @@ class UserThread(threading.Thread):
             if house.get_door() == "1": house.set_door(False)
             else: house.set_door(True)
             print ("door is now {}".format(house.get_door()))
+         elif cmd == "dl":
+            if house.get_door_lock() == "1": house.set_door_lock(False)
+            else: house.set_door_lock(True)
+            print ("door is now {}".format(house.get_door_lock()))
          elif cmd == "l":
             if house.get_light() == "1": house.set_light(False)
             else: house.set_light(True)
