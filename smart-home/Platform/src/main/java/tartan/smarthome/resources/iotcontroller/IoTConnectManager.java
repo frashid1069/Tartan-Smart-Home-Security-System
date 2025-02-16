@@ -78,20 +78,20 @@ public class IoTConnectManager {
                 if (count<keys.size()) {
                     newState.append(IoTValues.PARAM_DELIM);
                 }
-            } else if (key.equals(IoTValues.LIGHT_STATE)) {
-                Boolean newLightState = (Boolean) state.get(key);
-                newState.append(IoTValues.LIGHT_STATE);
+            } else if (key.equals(IoTValues.DOOR_LOCK_STATE)) {
+                Boolean newDoorLockState = (Boolean) state.get(key);
+                newState.append(IoTValues.DOOR_LOCK_STATE);
                 newState.append(IoTValues.PARAM_EQ);
-                if (newLightState) {
-                    newState.append(IoTValues.LIGHT_ON);
+                if (newDoorLockState) {
+                    newState.append(IoTValues.DOOR_LOCKED);
                 } else {
-                    newState.append(IoTValues.LIGHT_OFF);
+                    newState.append(IoTValues.DOOR_UNLOCKED);
                 }
                 count++;
                 if (count<keys.size()) {
                     newState.append(IoTValues.PARAM_DELIM);
                 }
-            } else if (key.equals(IoTValues.LIGHT_STATE)) {
+            }else if (key.equals(IoTValues.LIGHT_STATE)) {
                 Boolean newLightState = (Boolean) state.get(key);
                 newState.append(IoTValues.LIGHT_STATE);
                 newState.append(IoTValues.PARAM_EQ);
@@ -130,7 +130,7 @@ public class IoTConnectManager {
                 if (count<keys.size()) {
                     newState.append(IoTValues.PARAM_DELIM);
                 }
-            }else if (key.equals(IoTValues.HUMIDIFIER_STATE)) {
+            } else if (key.equals(IoTValues.HUMIDIFIER_STATE)) {
                 Boolean newHumidifierState = (Boolean) state.get(key);
                 newState.append(IoTValues.HUMIDIFIER_STATE);
                 newState.append(IoTValues.PARAM_EQ);
@@ -167,6 +167,32 @@ public class IoTConnectManager {
                 }
                 count++;
                 if (count<keys.size()) {
+                    newState.append(IoTValues.PARAM_DELIM);
+                }
+            } else if (key.equals(IoTValues.INTRUDER_STATE)) {
+                Boolean newIntruderState = (Boolean) state.get(key);
+                newState.append(IoTValues.INTRUDER_STATE);
+                newState.append(IoTValues.PARAM_EQ);
+                if (newIntruderState) {
+                    newState.append(IoTValues.INTRUDER_DETECTED);
+                } else {
+                    newState.append(IoTValues.INTRUDER_CLEAR);
+                }
+                count++;
+                if (count<keys.size()) {
+                    newState.append(IoTValues.PARAM_DELIM);
+                }
+            } else if(key.equals(IoTValues.PHONE_PROXIMITY)){
+                Boolean newPhoneProximity = (Boolean) state.get(key);
+                newState.append(IoTValues.PHONE_PROXIMITY);
+                newState.append(IoTValues.PARAM_EQ);
+                if(newPhoneProximity){
+                    newState.append(IoTValues.PHONE_DETECTED);
+                } else{
+                    newState.append(IoTValues.PHONE_NOT_DETECTED);
+                }
+                count++;
+                if (count <keys.size()){
                     newState.append(IoTValues.PARAM_DELIM);
                 }
             }
@@ -253,7 +279,13 @@ public class IoTConnectManager {
                 } else {
                     state.put(IoTValues.DOOR_STATE, false);
                 }
-            }  else if (data[0].equals(IoTValues.HUMIDIFIER_STATE)) {
+            }  else if (data[0].equals(IoTValues.DOOR_LOCK_STATE)) {
+                if (val == 1) {
+                    state.put(IoTValues.DOOR_LOCK_STATE, true);
+                } else {
+                    state.put(IoTValues.DOOR_LOCK_STATE, false);
+                }
+            }else if (data[0].equals(IoTValues.HUMIDIFIER_STATE)) {
                 if (val == 1) {
                     state.put(IoTValues.HUMIDIFIER_STATE, true);
                 } else {
@@ -282,6 +314,18 @@ public class IoTConnectManager {
                     state.put(IoTValues.CHILLER_STATE, true);
                 } else {
                     state.put(IoTValues.CHILLER_STATE, false);
+                }
+            } else if (data[0].equals(IoTValues.INTRUDER_STATE)) {
+                if (val == 1) {
+                    state.put(IoTValues.INTRUDER_STATE, true);
+                } else {
+                    state.put(IoTValues.INTRUDER_STATE, false);
+                }
+            } else if(data[0].equals(IoTValues.PHONE_PROXIMITY)){
+                if (val == 1){
+                    state.put(IoTValues.PHONE_PROXIMITY, true);
+                }else{
+                    state.put(IoTValues.PHONE_PROXIMITY, false);
                 }
             } else if (data[0].equals(IoTValues.TEMP_READING)) {
                 state.put(IoTValues.TEMP_READING, val);

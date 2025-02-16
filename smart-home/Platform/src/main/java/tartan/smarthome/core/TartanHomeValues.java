@@ -22,5 +22,14 @@ public abstract class TartanHomeValues {
     public static final String ACTIVE = "active";
     public static final String INACTIVE = "inactive";
 
+    public static final String DETECTED = "detected";
+    public static final String CLEAR = "clear";
+
+    public static final String PHONE_DETECTED = "detected";
+    public static final String PHONE_NOT_DETECTED = "none";
+
     public static final String UNKNOWN = "UNKNOWN";
+    
+    public static final String LOCKED = "locked";
+    public static final String UNLOCKED = "unlocked";
 }

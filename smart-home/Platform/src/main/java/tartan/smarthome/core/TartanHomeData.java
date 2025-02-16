@@ -31,6 +31,12 @@ public class TartanHomeData {
     @Column(name = "target_temp")
     private String targetTemp;
 
+    @Column(name = "night_start")
+    private String nightStart;
+
+    @Column(name = "night_end")
+    private String nightEnd;
+
     // the current temperature
     @Column(name = "temperature")
     private String temperature;
@@ -74,6 +80,15 @@ public class TartanHomeData {
     @Column(name = "alarm_enabled_state")
     private String alarmArmed;
 
+    @Column(name = "intruder_state")
+    private String intruderState;
+
+    @Column(name = "phone_proximity")
+    private String phoneProximity;
+
+    @Column(name = "door_lock_state")
+    private String doorLockState;
+
     /**
      * Create a mew data set from a TartanHome model
      * @param h the home model
@@ -82,6 +97,8 @@ public class TartanHomeData {
         this.homeName = h.getName();
         this.address = h.getAddress();
         this.targetTemp = h.getTargetTemp();
+        this.nightStart = h.getNightStart();
+        this.nightEnd = h.getNightEnd();
         this.temperature = h.getTemperature();
         this.humidity = h.getHumidity();
         this.door = h.getDoor();
@@ -93,7 +110,9 @@ public class TartanHomeData {
         this.alarmActive = h.getAlarmActive();
         this.alarmDelay = h.getAlarmDelay();
         this.alarmArmed = h.getAlarmArmed();
-
+        this.intruderState = h.getIntruderState();
+        this.phoneProximity = h.getPhoneProximity();
+        this.doorLockState = h.getDoorLockState();
         // Remember when this record is created
         this.createTimeStamp = new Date();
     }
@@ -144,6 +163,22 @@ public class TartanHomeData {
      */
     public void setTargetTemp(String targetTemp) { this.targetTemp = targetTemp; }
 
+    public String getNightStart() {
+        return nightStart;
+    }
+
+    public void setNightStart(String nightStart) {
+        this.nightStart = nightStart;
+    }
+
+    public String getNightEnd() {
+        return nightEnd;
+    }
+
+    public void setNightEnd(String nightEnd) {
+        this.nightEnd = nightEnd;
+    }
+
     /**
      * Get the current temperature
      * @return the temperature
@@ -191,6 +226,10 @@ public class TartanHomeData {
     public void setDoor(String door) {
         this.door = door;
     }
+
+    public void setDoorLockState(String doorLoackState){ this.doorLockState = doorLoackState;}
+
+    public String getDoorLockState(){return  this.doorLockState = doorLockState;}
 
     /**
      * Get the light state
@@ -320,7 +359,21 @@ public class TartanHomeData {
         this.hvacState = hvacState;
     }
 
+    public String getIntruderState() {
+        return intruderState;
+    }
 
+    public void setIntruderState(String intruderState) {
+        this.intruderState = intruderState;
+    }
+
+    public  String getPhoneProximity(){
+        return  phoneProximity;
+    }
+
+    public void setPhoneProximity(String phoneProximity){
+        this.phoneProximity = phoneProximity;
+    }
     /**
      * Get the ID
      * @return the ID

@@ -15,11 +15,17 @@ houses:
     # we must know the target temperature to start
     targetTemp: 70
 
+    nightStart: 00000
+    nightEnd: 00000
+
+
     # the default alarm delay
     alarmDelay: 30
 
     # and the super secret passcode to disable the alarm
     alarmPasscode: stop
+    doorLockPasscode: open
+
 
     # Next house
   - name: cmu
@@ -29,8 +35,11 @@ houses:
     user: admin
     password: 5678
     targetTemp: 70
+    nightStart: 0000
+    nightEnd: 0000
     alarmDelay: 30
     alarmPasscode: quit
+    doorLockPasscode: open
 
 # how many seconds between database snapshots
 historyTimer: 5

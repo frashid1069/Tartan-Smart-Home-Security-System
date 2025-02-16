@@ -1,73 +1,201 @@
-package tartan.smarthome;
+//package tartan.smarthome;
+//
+//import org.junit.jupiter.api.BeforeEach;
+//import org.junit.jupiter.api.Test;
+//import static org.junit.jupiter.api.Assertions.*;
+//import okhttp3.OkHttpClient;
+//import okhttp3.Request;
+//import okhttp3.Response;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
 
 public class SmartDoorLockTest {
 
-    private SmartDoorController smartDoorController;
-    private DoorLockService doorLockService;
-    private OkHttpClient client = new OkHttpClient();
-    private final String BASE_URL = "http://localhost:8080/smarthome";
-
-    @BeforeEach
-    void setup() {
-        doorLockService = new DoorLockService();  // Use the simple implementation of DoorLockService
-        smartDoorController = new SmartDoorController(doorLockService);
-    }
+//    private SmartDoorController smartDoorController;
+//    private DoorLockService doorLockService;
+//    private OkHttpClient client = new OkHttpClient();
+//    private final String BASE_URL = "http://localhost:8080/smarthome";
+//
+//    @BeforeEach
+//    void setup() {
+//        doorLockService = new DoorLockService();  // Use the simple implementation of DoorLockService
+//        smartDoorController = new SmartDoorController(doorLockService);
+//    }
 
     // ---------------------- UNIT TESTS ----------------------
 
-    @Test
-    void testLockDoor() {
-        boolean result = smartDoorController.lockDoor("house123");
-        assertTrue(result);
+    private SmartLock doorLock;
+
+    @BeforeEach
+    public void setUp() {
+        doorLock = new SmartLock();
     }
 
+    // Test for Locking with Correct Passcode
     @Test
-    void testUnlockDoor_CorrectPasscode() {
-        boolean result = smartDoorController.unlockDoor("house123", "1234");
-        assertTrue(result);
+    public void testLockWithCorrectPasscode() {
+        // Setup
+        String correctPasscode = "1234";
+        doorLock.setPasscode(correctPasscode);
+
+        // Act
+        boolean result = doorLock.lock("1234");
+
+        // Assert
+        assertTrue("Door should be locked with correct passcode", result);
     }
 
+    // Test for Locking with Incorrect Passcode
     @Test
-    void testUnlockDoor_IncorrectPasscode() {
-        boolean result = smartDoorController.unlockDoor("house123", "wrongPass");
-        assertFalse(result);
+    public void testLockWithIncorrectPasscode() {
+        // Setup
+        String correctPasscode = "1234";
+        doorLock.setPasscode(correctPasscode);
+
+        // Act
+        boolean result = doorLock.lock("0000");
+
+        // Assert
+        assertFalse("Door should not be locked with incorrect passcode", result);
     }
 
+    // Test for Unlocking with Correct Passcode
     @Test
-    void testKeylessEntry() {
-        boolean autoUnlock = smartDoorController.handleKeylessEntry("house123");
-        assertTrue(autoUnlock);
+    public void testUnlockWithCorrectPasscode() {
+        // Setup
+        String correctPasscode = "1234";
+        doorLock.setPasscode(correctPasscode);
+        doorLock.lock("1234");
+
+        // Act
+        boolean result = doorLock.unlock("1234");
+
+        // Assert
+        assertTrue("Door should be unlocked with correct passcode", result);
     }
 
+    // Test for Unlocking with Incorrect Passcode
     @Test
-    void testIntruderDefense_LockOnDetection() {
-        boolean autoLock = smartDoorController.handleIntruderDefense("house123");
-        assertTrue(autoLock);
+    public void testUnlockWithIncorrectPasscode() {
+        // Setup
+        String correctPasscode = "1234";
+        doorLock.setPasscode(correctPasscode);
+        doorLock.lock("1234");
+
+        // Act
+        boolean result = doorLock.unlock("0000");
+
+        // Assert
+        assertFalse("Door should not be unlocked with incorrect passcode", result);
     }
 
+    // Test for Unlocking with Proximity (Registered Phone)
     @Test
-    void testIntruderDefense_Alert() {
-        boolean alertSent = smartDoorController.sendIntruderAlert("house123");
-        assertTrue(alertSent);
+    public void testUnlockWithProximity() {
+        // Setup
+        doorLock.setRegisteredPhone("user_phone");
+
+        // Act
+        doorLock.detectProximity("user_phone");
+
+        // Assert
+        assertTrue("Door should unlock with registered phone proximity", doorLock.isUnlocked());
     }
 
+    // Test for Proximity Failure (Unregistered Phone)
     @Test
-    void testNightLock_AutoLock() {
-        boolean autoLocked = smartDoorController.handleNightLock("house123");
-        assertTrue(autoLocked);
+    public void testNoUnlockWithUnregisteredPhone() {
+        // Setup
+        doorLock.setRegisteredPhone("user_phone");
+
+        // Act
+        doorLock.detectProximity("other_phone");
+
+        // Assert
+        assertFalse("Door should not unlock with unregistered phone proximity", doorLock.isUnlocked());
     }
 
+    // Test for Lock on Intruder Detection
     @Test
-    void testNightLock_RelockIfUnlocked() {
-        boolean relocked = smartDoorController.relockAtNight("house123");
-        assertTrue(relocked);
+    public void testLockOnIntruderDetection() {
+        // Setup
+        doorLock.lock("1234"); // Door initially locked
+
+        // Act
+        doorLock.detectIntruder();
+
+        // Assert
+        assertTrue("Door should remain locked when intruder detected", doorLock.isLocked());
+    }
+
+    // Test for Unlock on Intruder Clear
+    @Test
+    public void testUnlockOnIntruderClear() {
+        // Setup
+        doorLock.lock("1234");
+        doorLock.detectIntruder(); // Intruder detected
+
+        // Act
+        doorLock.clearIntruder(); // Intruder cleared
+
+        // Assert
+        assertFalse("Door should be unlocked when intruder is cleared", doorLock.isLocked());
+    }
+
+    // Test for Auto Lock During Night
+    @Test
+    public void testAutoLockDuringNight() {
+        // Setup
+        doorLock.setNightStart(22); // 10:00 PM
+        doorLock.setNightEnd(6); // 6:00 AM
+        doorLock.lock("1234");
+
+        // Act
+        LocalTime now = LocalTime.of(23, 0); // It's 11:00 PM, within night time
+        doorLock.checkNightLock(now);
+
+        // Assert
+        assertTrue("Door should be locked at night", doorLock.isLocked());
+    }
+
+    // Test for Relocking if Unlocked During Night
+    @Test
+    public void testRelockIfUnlockedDuringNight() {
+        // Setup
+        doorLock.setNightStart(22); // 10:00 PM
+        doorLock.setNightEnd(6); // 6:00 AM
+        doorLock.lock("1234");
+
+        // Act
+        doorLock.unlock("1234"); // Unlock door
+        LocalTime now = LocalTime.of(23, 0); // It's 11:00 PM, within night time
+        doorLock.checkNightLock(now);
+
+        // Assert
+        assertTrue("Door should relock at night", doorLock.isLocked());
+    }
+
+    // Test for Locking and Unlocking Multiple Times
+    @Test
+    public void testLockAndUnlockMultipleTimes() {
+        // Setup
+        doorLock.setPasscode("1234");
+
+        // Act & Assert
+        assertTrue("Door should lock successfully", doorLock.lock("1234"));
+        assertTrue("Door should unlock successfully", doorLock.unlock("1234"));
+        assertFalse("Door should not unlock with wrong passcode", doorLock.unlock("0000"));
+    }
+
+    // Test for Locking with Empty Passcode
+    @Test
+    public void testPasscodeEmpty() {
+        // Setup
+        doorLock.setPasscode("");
+
+        // Act & Assert
+        assertFalse("Door should not lock with empty passcode", doorLock.lock(""));
     }
 
     // ---------------------- INTEGRATION TESTS ----------------------
