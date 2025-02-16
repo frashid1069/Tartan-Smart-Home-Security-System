@@ -58,6 +58,7 @@ class StaticTartanStateEvaluatorTest {
         assertTrue(logContent.contains("Cannot turn on light because user not home"), "Log should record why the light cannot turn on");
     }
 
+
     @Test
     @DisplayName("R2: If the alarm is enabled, and the door gets opened, then sound the alarm")
     void alarmSoundsWhenDoorOpensAndAlarmIsEnabledTest() {
@@ -154,5 +155,222 @@ class StaticTartanStateEvaluatorTest {
 //        assertTrue(logContent.contains("Away timer expired: closing door"), "Log should record door being closed");
 //    }
 
+
+
+
+
+    // G2 - Additional Tests
+
+
+    @Test
+    @DisplayName("R1: Light can turn on when the house is occupied")
+    void lightCanTurnOnWhenHouseOccupied() {
+        inState.put(IoTValues.PROXIMITY_STATE, true);
+        inState.put(IoTValues.LIGHT_STATE, true);
+        Map<String, Object> resultState = evaluator.evaluateState(inState, log);
+        assertTrue((Boolean) resultState.get(IoTValues.LIGHT_STATE), "Light should turn on when house is occupied");
+    }
+    @Test
+    @DisplayName("R2: Alarm should NOT sound when door opens and alarm is disabled")
+    void alarmDoesNotSoundWhenDisabled() {
+        inState.put(IoTValues.ALARM_STATE, false);
+        inState.put(IoTValues.DOOR_STATE, true);
+        Map<String, Object> resultState = evaluator.evaluateState(inState, log);
+        assertFalse((Boolean) resultState.get(IoTValues.ALARM_ACTIVE), "Alarm should NOT sound if disabled");
+    }
+
+    @Test
+    @DisplayName("R3: Door remains unchanged when house is occupied")
+    void doorRemainsSameWhenOccupied() {
+        inState.put(IoTValues.PROXIMITY_STATE, true);
+        inState.put(IoTValues.DOOR_STATE, true);
+        Map<String, Object> resultState = evaluator.evaluateState(inState, log);
+        assertTrue((Boolean) resultState.get(IoTValues.DOOR_STATE), "Door should remain open when house is occupied");
+    }
+
+    @Test
+    @DisplayName("R4: Alarm should NOT trigger when house gets occupied but alarm is OFF")
+    void alarmDoesNotSoundIfDisabledAndOccupied() {
+        inState.put(IoTValues.ALARM_STATE, false);
+        inState.put(IoTValues.PROXIMITY_STATE, true);
+        Map<String, Object> resultState = evaluator.evaluateState(inState, log);
+        assertFalse((Boolean) resultState.get(IoTValues.ALARM_ACTIVE), "Alarm should NOT trigger if disabled");
+    }
+
+    @Test
+    @DisplayName("R5: Away timer resets when house is occupied")
+    void awayTimerResetsWhenHouseOccupied() {
+        inState.put(IoTValues.AWAY_TIMER, true);
+        inState.put(IoTValues.PROXIMITY_STATE, true);
+        Map<String, Object> resultState = evaluator.evaluateState(inState, log);
+        assertFalse((Boolean) resultState.get(IoTValues.AWAY_TIMER), "Away timer should reset if house is occupied");
+    }
+
+
+    @Test
+    @DisplayName("Light Off: Should log 'Light off' when house is vacant")
+    void lightOffShouldLogCorrectly() {
+        inState.put(IoTValues.LIGHT_STATE, false); // Light is off
+        inState.put(IoTValues.PROXIMITY_STATE, false); // House is vacant
+
+        Map<String, Object> resultState = evaluator.evaluateState(inState, log);
+
+        // Check that the log contains the correct entry
+        assertTrue(log.toString().contains("Light off"), "Log should contain 'Light off'");
+    }
+
+    @Test
+    @DisplayName("Alarm Active: Ensure alarm active state is processed correctly")
+    void alarmActiveShouldBeProcessed() {
+        // Arrange: Set initial state
+        inState.put(IoTValues.ALARM_STATE, true);   // Alarm is enabled
+        inState.put(IoTValues.DOOR_STATE, false);   // Door is closed
+        inState.put(IoTValues.PROXIMITY_STATE, true); // Someone enters (unexpected presence)
+
+        // Act: Evaluate the state
+        Map<String, Object> resultState = evaluator.evaluateState(inState, log);
+
+        // Assert: Alarm should be active
+        assertNotNull(resultState.get(IoTValues.ALARM_ACTIVE), "Alarm active state should not be null");
+        assertTrue((Boolean) resultState.get(IoTValues.ALARM_ACTIVE), "Alarm active state should be recorded correctly");
+    }
+
+
+    @Test
+    @DisplayName("Humidity Reading: Ensure humidity value is processed correctly")
+    void humidityReadingShouldBeProcessed() {
+        inState.put(IoTValues.HUMIDITY_READING, 45);
+
+        Map<String, Object> resultState = evaluator.evaluateState(inState, log);
+
+        assertNotNull(resultState.get(IoTValues.HUMIDITY_READING), "Humidity should not be null");
+        assertEquals(45, resultState.get(IoTValues.HUMIDITY_READING), "Humidity should be recorded correctly");
+    }
+
+
+    @Test
+    @DisplayName("Door Closed: Ensure 'Closed door' is logged when alarm is off and no presence detected")
+    void doorClosedShouldLogCorrectly() {
+        // Arrange
+        inState.put(IoTValues.DOOR_STATE, false);     // Door is closed
+        inState.put(IoTValues.ALARM_STATE, false);    // Alarm is disabled
+        inState.put(IoTValues.PROXIMITY_STATE, false); // No one detected
+
+        // Act
+        Map<String, Object> resultState = evaluator.evaluateState(inState, log);
+
+        // Assert
+        assertTrue(log.toString().contains("Closed door"), "Log should record 'Closed door' when alarm is off and no presence detected");
+    }
+
+    @Test
+    @DisplayName("Closed Door: Ensure 'Closed door' is logged when alarm is ON but no presence detected")
+    void closedDoorWhenAlarmOnButNoProximity() {
+        // Arrange
+        inState.put(IoTValues.DOOR_STATE, false);     // Door is closed
+        inState.put(IoTValues.ALARM_STATE, true);     // Alarm is enabled
+        inState.put(IoTValues.PROXIMITY_STATE, false); // No presence detected
+
+        // Act
+        Map<String, Object> resultState = evaluator.evaluateState(inState, log);
+
+        // Assert
+        assertFalse((Boolean) resultState.get(IoTValues.ALARM_ACTIVE), "Alarm should NOT activate when no presence is detected");
+        assertTrue(log.toString().contains("Closed door"), "Log should record 'Closed door' when alarm is ON but no presence detected");
+    }
+
+    @Test
+    @DisplayName("Light Off: Ensure 'Light off' is logged when light is off")
+    void lightOffShouldBeLogged() {
+        // Arrange
+        inState.put(IoTValues.LIGHT_STATE, false); // Light is OFF
+
+        // Act
+        Map<String, Object> resultState = evaluator.evaluateState(inState, log);
+
+        // Assert
+        assertTrue(log.toString().contains("Light off"), "Log should record 'Light off' when light is turned off");
+    }
+
+
+    @Test
+    @DisplayName("Unrecognized Key: Ensure warning is logged for unknown keys")
+    void unrecognizedKeyShouldLogWarning() {
+        // Arrange: Add an unknown key
+        inState.put("UNKNOWN_KEY", true);  // Key does not exist in IoTValues
+
+        // Act
+        Map<String, Object> resultState = evaluator.evaluateState(inState, log);
+
+        // Assert
+        assertTrue(log.toString().contains("Warning: Unrecognized key in input state - UNKNOWN_KEY"),
+                "Log should contain warning about unknown key");
+    }
+
+    @Test
+    @DisplayName("Alarm State: Defaults to false when null")
+    void alarmStateDefaultsToFalseWhenNull() {
+        // Arrange: Set ALARM_STATE to null
+        inState.put(IoTValues.PROXIMITY_STATE, true);
+        inState.put(IoTValues.ALARM_STATE, null);
+
+        // Act
+        Map<String, Object> resultState = evaluator.evaluateState(inState, log);
+
+        // Assert: Verify that alarmState is now false
+        assertFalse((Boolean) resultState.get(IoTValues.ALARM_STATE), "alarmState should default to false when null");
+    }
+
+    @Test
+    @DisplayName("Door State: Defaults to false when null")
+    void doorStateDefaultsToFalseWhenNull() {
+        // Arrange: Set DOOR_STATE to null
+        inState.put(IoTValues.DOOR_STATE, null);
+
+        // Act
+        Map<String, Object> resultState = evaluator.evaluateState(inState, log);
+
+        // Assert: Verify that doorState is now false
+        assertFalse((Boolean) resultState.get(IoTValues.DOOR_STATE), "doorState should default to false when null");
+    }
+
+    @Test
+    @DisplayName("Proximity State: Defaults to false when null")
+    void proximityStateDefaultsToFalseWhenNull() {
+        // Arrange: Set PROXIMITY_STATE to null
+        inState.put(IoTValues.PROXIMITY_STATE, null);
+
+        // Act
+        Map<String, Object> resultState = evaluator.evaluateState(inState, log);
+
+        // Assert: Verify that proximityState is now false
+        assertFalse((Boolean) resultState.get(IoTValues.PROXIMITY_STATE), "proximityState should default to false when null");
+    }
+
+    @Test
+    @DisplayName("Light State: Defaults to false when null")
+    void lightStateDefaultsToFalseWhenNull() {
+        // Arrange: Set LIGHT_STATE to null
+        inState.put(IoTValues.LIGHT_STATE, null);
+
+        // Act
+        Map<String, Object> resultState = evaluator.evaluateState(inState, log);
+
+        // Assert: Verify that lightState is now false
+        assertFalse((Boolean) resultState.get(IoTValues.LIGHT_STATE), "lightState should default to false when null");
+    }
+
+    @Test
+    @DisplayName("Alarm Active State: Defaults to false when null")
+    void alarmActiveStateDefaultsToFalseWhenNull() {
+        // Arrange: Set ALARM_ACTIVE to null
+        inState.put(IoTValues.ALARM_ACTIVE, null);
+
+        // Act
+        Map<String, Object> resultState = evaluator.evaluateState(inState, log);
+
+        // Assert: Verify that alarmActiveState is now false
+        assertFalse((Boolean) resultState.get(IoTValues.ALARM_ACTIVE), "alarmActiveState should default to false when null");
+    }
 }
 

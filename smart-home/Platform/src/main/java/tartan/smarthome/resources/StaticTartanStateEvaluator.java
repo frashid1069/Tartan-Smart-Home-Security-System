@@ -45,6 +45,7 @@ public class StaticTartanStateEvaluator implements TartanStateEvaluator {
         String hvacSetting = null; // the HVAC mode setting, either Heater or Chiller
         String givenPassCode = "";
 
+
         System.out.println("Evaluating new state statically");
 
         Set<String> keys = inState.keySet();
@@ -81,19 +82,28 @@ public class StaticTartanStateEvaluator implements TartanStateEvaluator {
                 awayTimerState = (Boolean) inState.getOrDefault(key, false);
              } else if (key.equals(IoTValues.ALARM_ACTIVE)) {
                 alarmActiveState = (Boolean) inState.get(key);
+            } else {
+                log.append(formatLogEntry("Warning: Unrecognized key in input state - " + key));
             }
         }
+
+        // Ensure all boolean values are not null before using them
+        alarmState = alarmState != null ? alarmState : false;
+        doorState = doorState != null ? doorState : false;
+        proximityState = proximityState != null ? proximityState : false;
+        lightState = lightState != null ? lightState : false;
+        alarmActiveState = alarmActiveState != null ? alarmActiveState : false;
+
 
         if (lightState == true) {
             // The light was activated
             if (!proximityState) {
                 log.append(formatLogEntry("Cannot turn on light because user not home"));
-                    lightState = false;
-            }
-            else {
+                lightState = false;
+            } else {
                 log.append(formatLogEntry("Light on"));
-            }        
-        } else if (lightState) {
+            }
+        } else {
             log.append(formatLogEntry("Light off"));
         }
 
@@ -119,13 +129,25 @@ public class StaticTartanStateEvaluator implements TartanStateEvaluator {
         }
 
         // The door is now closed
-        else if (!doorState) {
-            // the door is closed - if the house is suddenly occupied this is a break-in
+//        else if (!doorState) {
+//            // the door is closed - if the house is suddenly occupied this is a break-in
+//            if (alarmState && proximityState) {
+//                log.append(formatLogEntry("Break in detected: Activating alarm"));
+//                alarmActiveState = true;
+//            } else {
+//                log.append(formatLogEntry("Closed door"));
+//            }
+//        }
+
+        // G2
+        // The door is now closed
+        else {
+            log.append(formatLogEntry("Closed door")); // ✅ Ensure this log always happens
+
+            // The door is closed - if the house is suddenly occupied, this is a break-in
             if (alarmState && proximityState) {
                 log.append(formatLogEntry("Break in detected: Activating alarm"));
                 alarmActiveState = true;
-            } else {
-                log.append(formatLogEntry("Closed door"));
             }
         }
         
@@ -161,7 +183,7 @@ public class StaticTartanStateEvaluator implements TartanStateEvaluator {
             log.append(formatLogEntry("Alarm enabled"));
             
 
-        } else if (!alarmState) { // attempt to disable alarm
+        } else { // attempt to disable alarm
 
             if (!proximityState) { 
                 alarmState = true;
@@ -193,14 +215,23 @@ public class StaticTartanStateEvaluator implements TartanStateEvaluator {
         // determine if the alarm should sound. There are two cases
         // 1. the door is opened when no one is home
         // 2. the house is suddenly occupied
-        try {
-            if ((alarmState && !doorState && proximityState) || (alarmState && doorState && !proximityState)) {
-                log.append(formatLogEntry("Activating alarm"));
-                alarmActiveState = true;
-            }
-        } catch (NullPointerException npe) {
-            // Not enough information to evaluate alarm
-            log.append(formatLogEntry("Warning: Not enough information to evaluate alarm"));
+//        try {
+//            if ((alarmState && !doorState && proximityState) || (alarmState && doorState && !proximityState)) {
+//                log.append(formatLogEntry("Activating alarm"));
+//                alarmActiveState = true;
+//            } else {
+//                log.append(formatLogEntry("Alarm not activated"));
+//            }
+//        } catch (NullPointerException npe) {
+//            // Not enough information to evaluate alarm
+//            log.append(formatLogEntry("Warning: Not enough information to evaluate alarm"));
+//        }
+
+        if ((alarmState && !doorState && proximityState) || (alarmState && doorState && !proximityState)) {
+            log.append(formatLogEntry("Activating alarm"));
+            alarmActiveState = true;
+        } else {
+            log.append(formatLogEntry("Alarm not activated"));
         }
 
        
@@ -278,6 +309,10 @@ public class StaticTartanStateEvaluator implements TartanStateEvaluator {
         newState.put(IoTValues.HVAC_MODE, hvacSetting);
         newState.put(IoTValues.ALARM_PASSCODE, alarmPassCode);
         newState.put(IoTValues.GIVEN_PASSCODE, givenPassCode);
+        // G2
+        if (humidityReading != null) {
+            newState.put(IoTValues.HUMIDITY_READING, humidityReading);
+        }
         
         return newState; 
     }

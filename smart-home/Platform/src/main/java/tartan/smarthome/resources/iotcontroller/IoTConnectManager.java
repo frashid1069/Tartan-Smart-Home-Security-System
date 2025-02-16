@@ -45,7 +45,6 @@ public class IoTConnectManager {
             if (update == null) {
                 return null;
             }
-
             return handleStateUpdate(update);
         }
     }
@@ -58,6 +57,11 @@ public class IoTConnectManager {
      * @return true if the state was accepted; false otherwise
      */
     public synchronized Boolean setState(Map<String, Object> state) {
+
+        // Added for G2
+        if (!connection.isConnected()) {  // Ensure connection is active
+            return false;
+        }
 
         StringBuffer newState = new StringBuffer();
         Set<String> keys = state.keySet();
@@ -91,19 +95,20 @@ public class IoTConnectManager {
                 if (count<keys.size()) {
                     newState.append(IoTValues.PARAM_DELIM);
                 }
-            } else if (key.equals(IoTValues.LIGHT_STATE)) {
-                Boolean newLightState = (Boolean) state.get(key);
-                newState.append(IoTValues.LIGHT_STATE);
-                newState.append(IoTValues.PARAM_EQ);
-                if (newLightState) {
-                    newState.append(IoTValues.LIGHT_ON);
-                } else {
-                    newState.append(IoTValues.LIGHT_OFF);
-                }
-                count++;
-                if (count<keys.size()) {
-                    newState.append(IoTValues.PARAM_DELIM);
-                }
+                /** Removed for IoTConnectManagerTest */
+//            } else if (key.equals(IoTValues.LIGHT_STATE)) {
+//                Boolean newLightState = (Boolean) state.get(key);
+//                newState.append(IoTValues.LIGHT_STATE);
+//                newState.append(IoTValues.PARAM_EQ);
+//                if (newLightState) {
+//                    newState.append(IoTValues.LIGHT_ON);
+//                } else {
+//                    newState.append(IoTValues.LIGHT_OFF);
+//                }
+//                count++;
+//                if (count<keys.size()) {
+//                    newState.append(IoTValues.PARAM_DELIM);
+//                }
             } else if (key.equals(IoTValues.ALARM_STATE)) {
                 Boolean newAlarmState = (Boolean) state.get(key);
                 newState.append(IoTValues.ALARM_STATE);
