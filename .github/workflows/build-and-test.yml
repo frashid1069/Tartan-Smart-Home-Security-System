@@ -39,6 +39,13 @@ jobs:
           cd Platform
           ./gradlew clean build
 
+      - name: set up pytest
+        run: pip install pytest requests beautifulsoup4
+
+      - name: Run System tests
+        working-directory: ./smart-home
+        run: pytest system_tests.py
+
       - name: Jacoco report
         id: jacoco
         working-directory: ./smart-home/Platform

@@ -62,7 +62,6 @@ class StaticTartanStateEvaluatorTest {
         assertTrue(logContent.contains("Cannot turn on light because user not home"), "Log should record why the light cannot turn on");
     }
 
-
     @Test
     @DisplayName("R2: If the alarm is enabled, and the door gets opened, then sound the alarm")
     void alarmSoundsWhenDoorOpensAndAlarmIsEnabledTest() {
@@ -159,6 +158,48 @@ class StaticTartanStateEvaluatorTest {
 //        assertTrue(logContent.contains("Away timer expired: closing door"), "Log should record door being closed");
 //    }
 
+    @Test
+    void integrationTestAlarmSoundsWhenDoorOpens() {
+        inState.put(IoTValues.ALARM_STATE, true);
+        inState.put(IoTValues.ALARM_ACTIVE, false);
+        inState.put(IoTValues.DOOR_STATE, true);
+
+        Map<String, Object> resultState = evaluator.evaluateState(inState, log);
+
+        assertTrue((Boolean) resultState.get(IoTValues.ALARM_ACTIVE));
+        assertTrue(log.toString().contains("Break in detected: Activating alarm"));
+    }
+
+    @Test
+    void integrationTestCloseDoorWhenHouseVacant() {
+        inState.put(IoTValues.DOOR_STATE, true);
+
+        Map<String, Object> resultState = evaluator.evaluateState(inState, log);
+
+        assertFalse((Boolean) resultState.get(IoTValues.DOOR_STATE));
+        assertTrue(log.toString().contains("Closed door because house vacant"));
+    }
+
+    @Test
+    void integrationTestAlarmSoundsWhenHouseGetsOccupied() {
+        inState.put(IoTValues.ALARM_STATE, true);
+        inState.put(IoTValues.PROXIMITY_STATE, false);
+        inState.put(IoTValues.ALARM_ACTIVE, false);
+        inState.put(IoTValues.PROXIMITY_STATE, true);
+
+        Map<String, Object> resultState = evaluator.evaluateState(inState, log);
+
+        assertTrue((Boolean) resultState.get(IoTValues.ALARM_ACTIVE));
+        assertTrue(log.toString().contains("Break in detected: Activating alarm"));
+    }
+
+    @Test
+    void integrationTestAwayTimerStartsWhenHouseIsEmpty() {
+        Map<String, Object> resultState = evaluator.evaluateState(inState, log);
+
+        assertTrue((Boolean) resultState.get(IoTValues.AWAY_TIMER));
+        assertTrue(log.toString().contains("Away timer started because house is empty"));
+    }
 
 
 
