@@ -1,5 +1,8 @@
 plugins {
-    id 'com.github.johnrengelman.shadow' version '7.1.2'
+    id 'info.solidsoft.pitest' version '1.15.0'
+    id 'java'
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
+    id 'jacoco'
 }
 group 'Tartan'
 version '1.0-SNAPSHOT'
@@ -29,6 +32,11 @@ dependencies {
     implementation 'mysql:mysql-connector-java:8.0.33'
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
     implementation 'jakarta.persistence:jakarta.persistence-api:3.1.0'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.2'
+    testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.10.2'
+    testImplementation 'com.squareup.okhttp3:okhttp:4.12.0'
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    pitest 'org.pitest:pitest-junit5-plugin:1.2.1'
 }
 
 
@@ -67,4 +75,28 @@ tasks.named('jar').configure {
 }
 test {
     useJUnitPlatform()
+    finalizedBy jacocoTestReport // report is always generated after tests run
+}
+
+jacocoTestReport {
+    dependsOn test // tests are required to run before generating the report
+}
+jacoco {
+    toolVersion = "0.8.12"
+}
+jacocoTestReport {
+    reports {
+        xml.required = false
+        csv.required = false
+        html.outputLocation = layout.buildDirectory.dir('jacocoHtml')
+    }
+}
+
+pitest {
+    junit5PluginVersion = '1.2.1'
+    pitestVersion = '1.15.2'
+    targetClasses = ['tartan.smarthome.*']  // Adjust package name as needed
+    targetTests = ['tartan.smarthome.*Test']
+    outputFormats = ['HTML']
+    timestampedReports = false
 }
