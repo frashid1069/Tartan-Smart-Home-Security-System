@@ -38,3 +38,8 @@ jobs:
           cd smart-home
           cd Platform
           ./gradlew clean build
+
+      - name: Jacoco report
+        id: jacoco
+        working-directory: ./smart-home/Platform
+        run: ./gradlew jacocoTestReport
