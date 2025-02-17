@@ -1,6 +1,8 @@
 plugins {
     id 'com.github.johnrengelman.shadow' version '8.1.1'
     id 'jacoco'
+    id 'info.solidsoft.pitest' version '1.15.0'
+    id 'java'
 }
 group 'Tartan'
 version '1.0-SNAPSHOT'
@@ -34,6 +36,7 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.10.2'
     testImplementation 'com.squareup.okhttp3:okhttp:4.12.0'
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    pitest 'org.pitest:pitest-junit5-plugin:1.2.1'
 }
 
 
@@ -87,4 +90,13 @@ jacocoTestReport {
         csv.required = false
         html.outputLocation = layout.buildDirectory.dir('jacocoHtml')
     }
+}
+
+pitest {
+    junit5PluginVersion = '1.2.1'
+    pitestVersion = '1.15.2'
+    targetClasses = ['tartan.smarthome.']  // Adjust package name as needed
+    targetTests = ['tartan.smarthome.Test']
+    outputFormats = ['HTML']
+    timestampedReports = false
 }
