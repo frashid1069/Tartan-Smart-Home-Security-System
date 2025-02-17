@@ -39,6 +39,8 @@ class StaticTartanStateEvaluatorTest {
         inState.put(IoTValues.ALARM_PASSCODE, "1234"); // Default passcode
         inState.put(IoTValues.GIVEN_PASSCODE, "");     // User has not entered a passcode
         inState.put(IoTValues.AWAY_TIMER, false);      // Away timer is not activated
+        inState.put(IoTValues.NIGHT_START, false);
+        inState.put(IoTValues.NIGHT_END, false);
     }
 
     @Test
