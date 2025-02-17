@@ -21,14 +21,17 @@ public class TartanHouseSimulator implements Runnable {
     private Integer tempReading; // the current temperature
     private Integer humidityReading; // the current humidity
     private Boolean doorState; // the state of the door (true if open, false if closed)
-    private Boolean dightState; // the state of the light (true if on, false if off)
+    private Boolean lightState; // the state of the light (true if on, false if off)
     private Boolean proximityState; // the state of the proximity sensor (true of house occupied, false if vacant)
     private Boolean alarmState; // the alarm state (true if enabled, false if disabled)
     private Boolean humidifierState; // the humidifier state (true if on, false if off)
     private Boolean heaterOnState; // the heater state (true if on, false if off)
     private Boolean chillerOnState; // the chiller state (true if on, false if off)
     private Boolean alarmActiveState; // the alarm active state (true if alarm sounding, false if alarm not sounding)
+    private Boolean intruderState;
+    private Boolean phoneProximityState;
     private String  hvacMode; // the HVAC mode setting, either Heater or Chiller
+    private Boolean doorLockState;
 
     /** connection settings */
     private String address = null;
@@ -48,12 +51,15 @@ public class TartanHouseSimulator implements Runnable {
     private final String DOOR_STATE = "DS";
     private final String LIGHT_STATE = "LS";
     private final String PROXIMITY_STATE = "PS";
+    private final String INTRUDER_STATE = "IS";
     private final String ALARM_STATE = "AS";
     private final String HVAC_MODE = "HM";
     private final String ALARM_ACTIVE = "AA";
     private final String HEATER_STATE = "HES";
     private final String CHILLER_STATE = "CHS";
     private final String PASSCODE = "PC";
+    private final String PHONE_PROXIMITY = "PP"; //to check if a phone is in prxomity of the house
+    private final String DOOR_LOCK_STATE = "DLS";
 
     // protocol control values
     private final String PARAM_DELIM = ";";
@@ -63,9 +69,15 @@ public class TartanHouseSimulator implements Runnable {
 
     // target temperature
     private final String TARGET_TEMP = "TT";
+    
+    private final String NIGHT_START = "NS";
+    private final String NIGHT_END = "NE";
 
     private final String DOOR_CLOSE = "0";
     private final String DOOR_OPEN = "1";
+
+    private final String DOOR_LOCKED = "0";
+    private final String DOOR_UNLOCKED = "1";
 
     private final String LIGHT_ON = "1";
     private final String LIGHT_OFF = "0";
@@ -82,10 +94,20 @@ public class TartanHouseSimulator implements Runnable {
     private final String CHILLER_ON = "1";
     private final String CHILLER_OFF = "0";
 
+
+
+    private final String INTRUDER_DETECTED = "1";
+    private final String INTRUDER_CLEAR = "0";
+
+    private final String PHONE_DETECTED = "1";
+    private final String PHONE_NOT_DETECTED = "0";
+
     private final String OK = "OK";
 
     private final String ALARM_DELAY = "ALARM_DELAY";
     private final String ALARM_PASSCODE = "ALARM_PASSCODE";
+
+    private final String DOOR_LOCK_PASSCODE = "DOOR_LOCK_PASSCODE";
 
     private final String GET_STATE = "GS";
     private final String SET_STATE = "SS";
@@ -195,7 +217,20 @@ public class TartanHouseSimulator implements Runnable {
                     if (count < keys.size()) {
                         newState.append(PARAM_DELIM);
                     }
-                } else if (key.equals(LIGHT_STATE)) {
+                } else if (key.equals(DOOR_LOCK_STATE)) {
+                    Boolean newDoorLockState = (Boolean) state.get(key);
+                    newState.append(DOOR_LOCK_STATE);
+                    newState.append(PARAM_EQ);
+                    if (newDoorLockState) {
+                        newState.append(DOOR_LOCKED);
+                    } else {
+                        newState.append(DOOR_UNLOCKED);
+                    }
+                    count++;
+                    if (count < keys.size()) {
+                        newState.append(PARAM_DELIM);
+                    }
+                }else if (key.equals(LIGHT_STATE)) {
                     Boolean newLightState = (Boolean) state.get(key);
                     newState.append(LIGHT_STATE);
                     newState.append(PARAM_EQ);
@@ -208,14 +243,23 @@ public class TartanHouseSimulator implements Runnable {
                     if (count < keys.size()) {
                         newState.append(PARAM_DELIM);
                     }
-                } else if (key.equals(LIGHT_STATE.toString())) {
-                    Boolean newLightState = (Boolean) state.get(key);
-                    newState.append(LIGHT_STATE);
+                }else if (key.equals((PHONE_PROXIMITY))){
+                    Boolean newPhoneProximity = (Boolean) state.get(key);
+                    newState.append(PHONE_PROXIMITY);
                     newState.append(PARAM_EQ);
-                    if (newLightState) {
-                        newState.append(LIGHT_ON);
+                    if(newPhoneProximity){
+                        newState.append(PHONE_DETECTED);
+                    }else{
+                        newState.append(PHONE_NOT_DETECTED);
+                    }
+                } else if (key.equals(INTRUDER_STATE.toString())) {
+                    Boolean newIntruderState = (Boolean) state.get(key);
+                    newState.append(INTRUDER_STATE);
+                    newState.append(PARAM_EQ);
+                    if (newIntruderState) {
+                        newState.append(INTRUDER_DETECTED);
                     } else {
-                        newState.append(LIGHT_OFF);
+                        newState.append(INTRUDER_CLEAR);
                     }
                     count++;
                     if (count < keys.size()) {
@@ -373,7 +417,20 @@ public class TartanHouseSimulator implements Runnable {
                     } else {
                         state.put(HEATER_OFF, false);
                     }
-                } else if (data[0].equals(CHILLER_STATE)) {
+                } else if (data[0].equals(INTRUDER_STATE)) {
+                    if (val == 1) {
+                        state.put(INTRUDER_STATE, true);
+                    } else {
+                        state.put(INTRUDER_STATE, false);
+                    }
+                }else if (data[0].equals(PHONE_PROXIMITY)){
+                    if (val == 1){
+                        state.put(PHONE_PROXIMITY, true);
+                    }else{
+                        state.put(PHONE_PROXIMITY, false);
+                    }
+                }
+                else if (data[0].equals(CHILLER_STATE)) {
                     if (val == 1) {
                         state.put(CHILLER_ON, true);
                     } else {

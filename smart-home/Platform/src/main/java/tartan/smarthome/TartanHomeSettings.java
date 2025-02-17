@@ -35,11 +35,23 @@ public class TartanHomeSettings {
 
     @NotEmpty
     @JsonProperty
+    private String nightStart;
+
+    @NotEmpty
+    @JsonProperty
+    private String nightEnd;
+
+    @NotEmpty
+    @JsonProperty
     private String alarmDelay;
 
     @NotEmpty
     @JsonProperty
     private String alarmPasscode;
+
+    @NotEmpty
+    @JsonProperty
+    private String doorLockPasscode;
 
     public String getTargetTemp() {
         return targetTemp;
@@ -47,6 +59,22 @@ public class TartanHomeSettings {
 
     public void setTargetTemp(String targetTemp) {
         this.targetTemp = targetTemp;
+    }
+
+    public String getNightStart() {
+        return nightStart;
+    }
+
+    public void setNightStart(String nightStart) {
+        this.nightStart = nightStart;
+    }
+
+    public String getNightEnd() {
+        return nightEnd;
+    }
+
+    public void setNightEnd(String nightEnd) {
+        this.nightEnd = nightEnd;
     }
 
     public String getAlarmDelay() {
@@ -98,4 +126,8 @@ public class TartanHomeSettings {
     public String getAlarmPasscode() { return alarmPasscode;  }
 
     public void setAlarmPasscode(String alarmPasscode) { this.alarmPasscode = alarmPasscode;  }
+
+    public String getDoorLockPasscode(){ return doorLockPasscode; }
+
+    public void setDoorLockPasscode(String doorLockPasscode) { this.doorLockPasscode = doorLockPasscode; }
 }

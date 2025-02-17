@@ -22,6 +22,12 @@ public class TartanHome {
     @JsonProperty
     private String targetTemp;
 
+    @JsonProperty
+    private String nightStart;
+
+    @JsonProperty
+    private String nightEnd;
+
     // the current temperature
     @JsonProperty
     private String temperature;
@@ -66,6 +72,17 @@ public class TartanHome {
     @JsonProperty
     private String alarmArmed;
 
+    // the intruder state
+    @JsonProperty
+    private String intruderState;
+
+    // phone proximity state
+    @JsonProperty
+    private String phoneProximity;
+
+    @JsonProperty
+    private String doorLockState;
+
     // Properties that are not part of the historical record
     @JsonProperty
     private List<String> eventLog;
@@ -75,6 +92,9 @@ public class TartanHome {
 
     @JsonProperty
     private String alarmPasscode;
+
+    @JsonProperty
+    private String doorLockPasscode;
 
     /**
      * Empty constructor needed by Jackson deserialization
@@ -127,6 +147,22 @@ public class TartanHome {
      * @param targetTemp the new target temperature
      */
     public void setTargetTemp(String targetTemp) { this.targetTemp = targetTemp; }
+
+    public String getNightStart() {
+        return nightStart;
+    }
+
+    public void setNightStart(String nightStart) {
+        this.nightStart = nightStart;
+    }
+
+    public String getNightEnd() {
+        return nightEnd;
+    }
+
+    public void setNightEnd(String nightEnd) {
+        this.nightEnd = nightEnd;
+    }
 
     /**
      * Get the current temperature
@@ -240,6 +276,27 @@ public class TartanHome {
         this.alarmArmed = alarmArmed;
     }
 
+    public String getIntruderState() {
+        return intruderState;
+    }
+
+    public void setIntruderState(String intruderState) {
+        this.intruderState = intruderState;
+    }
+
+    /**
+     * Get phone proxmity state
+     * @return the status of the phone proximity sensor
+     */
+
+    public  String getPhoneProximity(){
+        return  phoneProximity;
+    }
+
+    public void setPhoneProximity(String phoneProximity){
+        this.phoneProximity = phoneProximity;
+    }
+
     /**
      * Get the HVAC mode
      * @return the HVAC mode
@@ -341,6 +398,30 @@ public class TartanHome {
      * @param alarmPasscode the new passcode
      */
     public void setAlarmPasscode(String alarmPasscode) { this.alarmPasscode = alarmPasscode; }
+
+    /**
+     * Get the doorlock passcode
+     * @return the passcode
+     */
+    public String getDoorLockPasscode() { return doorLockPasscode; }
+
+    /**
+     * Set the doorlock passcode
+     * @param doorLockPasscode the new passcode
+     */
+    public void setDoorLockPasscode(String doorLockPasscode) { this.doorLockPasscode = doorLockPasscode; }
+
+    /**
+     * Get the doorlock state
+     * @return the state
+     */
+    public String getDoorLockState() { return doorLockState; }
+
+    /**
+     * Set the doorlock state
+     * @param doorLockState the state
+     */
+    public void setDoorLockState(String doorLockState) { this.doorLockState = doorLockState; }
 
     @Override
     public boolean equals(Object o) {

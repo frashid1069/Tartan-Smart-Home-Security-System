@@ -21,8 +21,10 @@ See -->
                 var armAlarm = $('#armAlarm').val();
                 var passcode = $('#alarmPasscode').val();
                 var hvacMode = $('#hvacMode').val();
+                var doorLockPasscode = $('#doorLockPasscode').val();
+                var doorLockState = $('#doorLockState').val();
 
-                return JSON.stringify({"door":door,"light":light,"targetTemp":targetTemp,"humidifier":humidifier,"alarmArmed":armAlarm,"alarmDelay":alarmDelay,"alarmPasscode":passcode});
+                return JSON.stringify({"door":door,"light":light,"targetTemp":targetTemp,"humidifier":humidifier,"alarmArmed":armAlarm,"alarmDelay":alarmDelay,"alarmPasscode":passcode, "doorLockState":doorLockState});
             }
 
             // Auto scroll
@@ -59,12 +61,45 @@ See -->
                     },
                 });
             });
+
+            $("#door_lock_button").click(function(){
+
+                $.ajax({
+                    type: 'POST',
+                    contentType: 'application/json',
+                    url:  '/smarthome/update/${tartanHome.name}',
+                    data: updateState(),
+                    success: function(data) {
+                        location.reload(true);
+                    },
+                    error: function(jqXHR, textStatus, errorThrown) {
+                        alert("Could not unlock door for ${tartanHome.name}");
+                    },
+                });
+            });
+
+            $("#door_unlock_button").click(function(){
+
+                $.ajax({
+                    type: 'POST',
+                    contentType: 'application/json',
+                    url:  '/smarthome/update/${tartanHome.name}',
+                    data: updateState(),
+                    success: function(data) {
+                        location.reload(true);
+                    },
+                    error: function(jqXHR, textStatus, errorThrown) {
+                        alert("Could not unlock door for ${tartanHome.name}");
+                    },
+                });
+            });
+
         });
 </script>
 </head>
 <style>
 
-font-family: "Times New Roman", Times, serif;
+font-family:"Times New Roman", Times, serif;
 input[type=text], select {
     width: 100%;
     padding: 12px 20px;
@@ -143,6 +178,14 @@ div {
         </select>
     </p>
     <p>
+        <label for="doorLockPasscode">Door Lock state: ${tartanHome.doorLockState}</label>
+        <button id="door_lock_button">lock Door</button>
+    </p>
+    <p>
+        <label for="doorLockPasscode">Doorlock passcode: </label><input id="doorLockPasscode" type="text" />
+        <button id="door_unlock_button">Unlock Door</button>
+    </p>
+    <p>
         <strong>Light state:</strong>
         <select name="slider-flip-m" id="light" data-role="slider" data-mini="true">
         <#if tartanHome.light == "on">
@@ -153,6 +196,13 @@ div {
             <option value="off" selected="true">off</option>
         </#if>
         </select>
+    </p>
+    <hr>
+    <hr>
+    <h3>Night Lock<h3>
+    <p>
+        <strong>Night Start: <font color="blue"> ${tartanHome.nightStart}</font></strong>
+        <strong>Night End: <font color="blue"> ${tartanHome.nightEnd}</font></strong>
     </p>
     <hr>
     <h3>Alarm System</h3>
@@ -183,6 +233,17 @@ div {
         </strong>
     </p>
     <hr>
+    <h3>Intruder Detection<h3>
+    <p>
+        <strong>Intruder status: <font color="red"> ${tartanHome.intruderState}</font></strong>
+    </p>
+    <hr>
+    <hr>
+    <h3>Phone Detection<h3>
+    <p>
+        <strong>Device status: <font color="red"> ${tartanHome.phoneProximity}</font></strong>
+    </p>
+    
     <h3> Event log</h3>
     <textarea id="log" rows="15" cols="150">
     <#list tartanHome.eventLog as i>
@@ -192,6 +253,7 @@ div {
     <p>
         <button id="update_button">Update house state</button> <button id="refresh_button">Refresh house state</button>
     </p>
+
 </fieldset>
 </div>
 </body>
