@@ -42,6 +42,6 @@ jobs:
       - name: set up pytest
         run: pip install pytest requests beautifulsoup4
 
-      - name: Run Integration tests
+      - name: Run System tests
         working-directory: ./smart-home
-        run: pytest server_integration_tests.py
+        run: pytest system_tests.py
