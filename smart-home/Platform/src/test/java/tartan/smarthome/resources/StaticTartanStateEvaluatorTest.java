@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
 import tartan.smarthome.resources.iotcontroller.IoTValues;
 
+import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -377,24 +378,58 @@ class StaticTartanStateEvaluatorTest {
     }
 
     @Test
-    @DisplayName("Door lock state should be set correctly")
-    void doorLockStateShouldUpdateProperly() {
-        // Locking the door
-        inState.put(IoTValues.DOOR_LOCK_STATE, true);
-
-        Map<String, Object> resultState = evaluator.evaluateState(inState, log);
-
-        assertTrue((Boolean) resultState.get(IoTValues.DOOR_LOCK_STATE), "Door should be locked");
-        assertTrue(log.toString().contains("Door locked"), "Door was locked");
-
-        // Unlocking the door
+    @DisplayName("Night Lock Test 1: Valid times, current time within night period, door is closed")
+    void testNightLockDuringNight() {
+        inState.put(IoTValues.NIGHT_START, 2200);
+        inState.put(IoTValues.NIGHT_END, 600);
+        inState.put(IoTValues.DOOR_STATE, false);
         inState.put(IoTValues.DOOR_LOCK_STATE, false);
 
-        resultState = evaluator.evaluateState(inState, log);
+        // Set current time to 11:00 PM
+        LocalTime testTime = LocalTime.of(23, 0);
 
-        assertFalse((Boolean) resultState.get(IoTValues.DOOR_LOCK_STATE), "Door should be unlocked");
-        assertTrue(log.toString().contains("Door unlocked"), "Door was unlocked");
+        Map<String, Object> resultState = evaluator.evaluateState(inState, log, testTime);
+
+        assertTrue((Boolean) resultState.get(IoTValues.DOOR_LOCK_STATE), "Door should be locked during night time");
+
+        String logContent = log.toString();
     }
 
+    @Test
+    @DisplayName("Night Lock Test 2: Valid times, current time outside night period")
+    void testNightLockOutsideNight() {
+        inState.put(IoTValues.NIGHT_START, 2200);
+        inState.put(IoTValues.NIGHT_END, 600);
+        inState.put(IoTValues.DOOR_STATE, false);
+        inState.put(IoTValues.DOOR_LOCK_STATE, false);
+
+        // Set current time to 1:00 PM
+        LocalTime testTime = LocalTime.of(13, 0);
+
+        Map<String, Object> resultState = evaluator.evaluateState(inState, log, testTime);
+
+        assertFalse((Boolean) resultState.get(IoTValues.DOOR_LOCK_STATE), "Door should remain unlocked outside night time");
+
+        String logContent = log.toString();
+    }
+
+    @Test
+    @DisplayName("Night Lock Test 3: Invalid night start and end times")
+    void testNightLockInvalidTimes() {
+        inState.put(IoTValues.NIGHT_START, 2500);
+        inState.put(IoTValues.NIGHT_END, -100);
+        inState.put(IoTValues.DOOR_STATE, false);
+        inState.put(IoTValues.DOOR_LOCK_STATE, false);
+
+        // Set current time to any valid time
+        LocalTime testTime = LocalTime.of(23, 0);
+
+        Map<String, Object> resultState = evaluator.evaluateState(inState, log, testTime);
+
+        assertFalse((Boolean) resultState.get(IoTValues.DOOR_LOCK_STATE), "Door lock state should remain unchanged with invalid times");
+
+        String logContent = log.toString();
+        assertTrue(logContent.contains("Night lock is disabled due to invalid time specifications"), "Error message for invalid times");
+    }
 }
 
