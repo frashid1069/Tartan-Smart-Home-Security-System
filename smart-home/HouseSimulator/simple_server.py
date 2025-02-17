@@ -225,6 +225,8 @@ class UserThread(threading.Thread):
             if house.get_proximity() == "1": house.set_proximity(False)
             else: house.set_proximity(True)
             print ("proximity is now {}".format(house.get_proximity()))
+         else:
+             print("no cmd")
 
       return
 

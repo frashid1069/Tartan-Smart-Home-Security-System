@@ -38,3 +38,10 @@ jobs:
           cd smart-home
           cd Platform
           ./gradlew clean build
+
+      - name: set up pytest
+        run: pip install pytest requests beautifulsoup4
+
+      - name: Run Integration tests
+        working-directory: ./smart-home
+        run: pytest server_integration_tests.py
