@@ -85,15 +85,18 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Install SSH key
-        uses: shimataro/ssh-key-action@v2
-        with:
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          known_hosts: ${{ secrets.SSH_KNOWN_HOSTS }}
-
-      - name: Deploy to VM
+      - name: Install SSH key from .pem file
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+          # Save the .pem file content to a file
+          echo "${{ secrets.SSH_PEM_KEY }}" > deploy-key.pem
+          # Set correct permissions for the .pem file
+          chmod 600 deploy-key.pem
+
+      - name: Deploy to VM using IPv6
+        run: |
+          ssh -o StrictHostKeyChecking=no \
+              -i deploy-key.pem \
+              ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
           cd /path/to/your/project
           git pull origin main
           docker-compose down
