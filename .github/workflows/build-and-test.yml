@@ -87,15 +87,14 @@ jobs:
 
       - name: Install SSH key from .pem file
         run: |
-          # Save the .pem file content to a file
           echo "${{ secrets.SSH_PEM_KEY }}" > deploy-key.pem
-          # Set correct permissions for the .pem file
           chmod 600 deploy-key.pem
 
-      - name: Deploy to VM using IPv6
+      - name: Deploy to VM via Bastion
         run: |
           ssh -o StrictHostKeyChecking=no \
               -i deploy-key.pem \
+              -J bastion-user@<bastion-ipv4> \
               ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
           cd /path/to/your/project
           git pull origin main
