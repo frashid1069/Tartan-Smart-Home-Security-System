@@ -8,6 +8,14 @@ services:
     build: HouseSimulator/
     ports:
      - "5050:5050"
+  house-us1: 
+    build: HouseSimulator/
+    ports:
+     - "5052:5050"
+  house-us2: 
+    build: HouseSimulator/
+    ports:
+     - "5053:5050"
   platform:
     build:
       context: Platform/
@@ -16,6 +24,8 @@ services:
      - "mysql-container"
      - "house-cmu"
      - "house-mse"
+     - "house-us1"
+     - "house-us2"
     ports:
      - "8080:8080"
   mysql-container:

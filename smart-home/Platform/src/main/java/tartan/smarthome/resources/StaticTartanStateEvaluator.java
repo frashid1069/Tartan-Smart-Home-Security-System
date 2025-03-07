@@ -62,7 +62,6 @@ public class StaticTartanStateEvaluator implements TartanStateEvaluator {
 
         Set<String> keys = inState.keySet();
         for (String key : keys) {
-
             if (key.equals(IoTValues.TEMP_READING)) {
                 tempReading = (Integer) inState.get(key);
             } else if (key.equals(IoTValues.HUMIDITY_READING)) {
@@ -167,25 +166,11 @@ public class StaticTartanStateEvaluator implements TartanStateEvaluator {
             } else {
                 log.append(formatLogEntry("Door open"));
             }
-
+        
             // The door is open the alarm is to be set and somebody is home - this is not
             // allowed so discard the processStateUpdate
         }
-
-        // The door is now closed
-//        else if (!doorState) {
-//            // the door is closed - if the house is suddenly occupied this is a break-in
-//            if (alarmState && proximityState) {
-//                log.append(formatLogEntry("Break in detected: Activating alarm"));
-//                alarmActiveState = true;
-//            } else {
-//                log.append(formatLogEntry("Closed door"));
-//            }
-//        }
-
-        // G2
-        // The door is now closed
-        else {
+            else {
             log.append(formatLogEntry("Closed door")); // ✅ Ensure this log always happens
 
             // The door is closed - if the house is suddenly occupied, this is a break-in
@@ -233,10 +218,7 @@ public class StaticTartanStateEvaluator implements TartanStateEvaluator {
         // set the alarm
         if (alarmState) {
             log.append(formatLogEntry("Alarm enabled"));
-
-
         } else { // attempt to disable alarm
-
             if (!proximityState) {
                 alarmState = true;
                 log.append(formatLogEntry("Cannot disable the alarm, house is empty"));
@@ -266,18 +248,6 @@ public class StaticTartanStateEvaluator implements TartanStateEvaluator {
         // determine if the alarm should sound. There are two cases
         // 1. the door is opened when no one is home
         // 2. the house is suddenly occupied
-//        try {
-//            if ((alarmState && !doorState && proximityState) || (alarmState && doorState && !proximityState)) {
-//                log.append(formatLogEntry("Activating alarm"));
-//                alarmActiveState = true;
-//            } else {
-//                log.append(formatLogEntry("Alarm not activated"));
-//            }
-//        } catch (NullPointerException npe) {
-//            // Not enough information to evaluate alarm
-//            log.append(formatLogEntry("Warning: Not enough information to evaluate alarm"));
-//        }
-
         if ((alarmState && !doorState && proximityState) || (alarmState && doorState && !proximityState)) {
             log.append(formatLogEntry("Activating alarm"));
             alarmActiveState = true;
@@ -307,12 +277,9 @@ public class StaticTartanStateEvaluator implements TartanStateEvaluator {
                     chillerOnState = true;
                 } // AC already on
             }
-        }
-        // AC not needed
-        else {
+        } else { // AC not needed
             chillerOnState = false;
         }
-
 
         if (chillerOnState) {
             hvacSetting = "Chiller";
@@ -359,6 +326,8 @@ public class StaticTartanStateEvaluator implements TartanStateEvaluator {
             }
         }
 
+        // String msg = "Door lock state is " + doorLockState;
+        // log.append(formatLogEntry(msg));
 
         Map<String, Object> newState = new Hashtable<>();
         newState.put(IoTValues.TEMP_READING, tempReading);
@@ -368,17 +337,15 @@ public class StaticTartanStateEvaluator implements TartanStateEvaluator {
         newState.put(IoTValues.NIGHT_END, nightEnd);
         newState.put(IoTValues.HUMIDIFIER_STATE, humidifierState);
         newState.put(IoTValues.DOOR_STATE, doorState);
-        newState.put(IoTValues.AWAY_TIMER, awayTimerState);
         newState.put(IoTValues.LIGHT_STATE, lightState);
         newState.put(IoTValues.PROXIMITY_STATE, proximityState);
         newState.put(IoTValues.ALARM_STATE, alarmState);
-
         newState.put(IoTValues.HEATER_STATE, heaterOnState);
         newState.put(IoTValues.CHILLER_STATE, chillerOnState);
         newState.put(IoTValues.ALARM_ACTIVE, alarmActiveState);
         newState.put(IoTValues.HVAC_MODE, hvacSetting);
         newState.put(IoTValues.ALARM_PASSCODE, alarmPassCode);
-
+        newState.put(IoTValues.AWAY_TIMER, awayTimerState);
         newState.put(IoTValues.INTRUDER_STATE, intruderState);
         newState.put(IoTValues.PHONE_PROXIMITY, phoneProximityState);
         newState.put(IoTValues.DOOR_LOCK_PASSCODE, doorLockPasscode);

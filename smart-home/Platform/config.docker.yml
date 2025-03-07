@@ -10,6 +10,11 @@ houses:
     user: admin
     password: 1234
 
+    # AB Testing group
+    groupExperiment: lights
+
+    doorLockPasscode: open
+
     # the default configuration for the house
 
     # we must know the target temperature to start
@@ -35,9 +40,40 @@ houses:
     targetTemp: 70
     nightStart: 0
     nightEnd: 0
-
+    groupExperiment: control
     alarmDelay: 30
     alarmPasscode: quit
+    doorLockPasscode: open
+
+    # Next house
+  - name: us1
+    address: house-us1
+    port: 5050
+
+    user: admin
+    password: 1235
+    targetTemp: 70
+    nightStart: 0
+    nightEnd: 0
+    alarmDelay: 30
+    alarmPasscode: quit
+    groupExperiment: lights
+    doorLockPasscode: open
+
+    # Next house
+  - name: us2
+    address: house-us2
+    port: 5050
+
+    user: admin
+    password: 1236
+    targetTemp: 70
+    nightStart: 0
+    nightEnd: 0
+    alarmDelay: 30
+    alarmPasscode: quit
+    groupExperiment: control
+    doorLockPasscode: open
 
 # how many seconds between database snapshots
 historyTimer: 5

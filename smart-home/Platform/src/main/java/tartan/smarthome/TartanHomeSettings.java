@@ -53,6 +53,10 @@ public class TartanHomeSettings {
     @JsonProperty
     private String doorLockPasscode;
 
+    @NotEmpty
+    @JsonProperty
+    private String groupExperiment;
+
     public String getTargetTemp() {
         return targetTemp;
     }
@@ -127,7 +131,15 @@ public class TartanHomeSettings {
 
     public void setAlarmPasscode(String alarmPasscode) { this.alarmPasscode = alarmPasscode;  }
 
-    public String getDoorLockPasscode(){ return doorLockPasscode; }
+    public String getDoorLockPasscode() { return doorLockPasscode; }
 
     public void setDoorLockPasscode(String doorLockPasscode) { this.doorLockPasscode = doorLockPasscode; }
+
+    public String getGroupExperiment(){
+        return groupExperiment == null ? "0" :groupExperiment;
+    }
+
+    public void setGroupExperiment(String groupExperiment){
+        this.groupExperiment = groupExperiment;
+    }
 }

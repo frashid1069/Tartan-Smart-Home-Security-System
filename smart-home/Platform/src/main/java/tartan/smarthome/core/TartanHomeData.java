@@ -30,6 +30,7 @@ public class TartanHomeData {
     // The desired temperature
     @Column(name = "target_temp")
     private String targetTemp;
+    
 
     @Column(name = "night_start")
     private String nightStart;
@@ -89,6 +90,15 @@ public class TartanHomeData {
     @Column(name = "door_lock_state")
     private String doorLockState;
 
+    @Column(name = "group_experiment")
+    private String groupExperiment;
+
+    @Column(name = "minutes_lights_on")
+    private Long minutesLightsOn;
+
+    @Column(name = "intruder_occurrences")
+    private Integer intruderOccurrences;
+
     /**
      * Create a mew data set from a TartanHome model
      * @param h the home model
@@ -115,6 +125,8 @@ public class TartanHomeData {
         this.doorLockState = h.getDoorLockState();
         // Remember when this record is created
         this.createTimeStamp = new Date();
+        this.minutesLightsOn = h.getMinutesLightsOn();
+        this.groupExperiment = h.getGroupExperiment();
     }
 
     /**
@@ -211,6 +223,15 @@ public class TartanHomeData {
         this.humidity = humidity;
     }
 
+    public String getGroupExperiment(){
+        return this.groupExperiment;
+    }
+
+    public void setGroupExperiment(String groupExperiment){
+        this.groupExperiment = groupExperiment;
+    }
+
+
     /**
      * Get the door state
      * @return the door state
@@ -253,6 +274,14 @@ public class TartanHomeData {
      */
     public String getHumidifier() {
         return humidifier;
+    }
+
+    public Long getMinutesLightsOn(){
+        return minutesLightsOn;
+    }
+
+    public void setMinutesLightsOn(Long minutesLightsOn){
+        this.minutesLightsOn = minutesLightsOn;
     }
 
     /**

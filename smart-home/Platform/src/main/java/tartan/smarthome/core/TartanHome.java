@@ -96,6 +96,15 @@ public class TartanHome {
     @JsonProperty
     private String doorLockPasscode;
 
+    @JsonProperty
+    private String groupExperiment;
+
+    @JsonProperty
+    private Long minutesLightsOn;
+
+    @JsonProperty
+    private Integer intruderOccurrences;
+
     /**
      * Empty constructor needed by Jackson deserialization
      */
@@ -422,6 +431,30 @@ public class TartanHome {
      * @param doorLockState the state
      */
     public void setDoorLockState(String doorLockState) { this.doorLockState = doorLockState; }
+
+    public Long getMinutesLightsOn(){
+        return minutesLightsOn;
+    }
+
+    public void setMinutesLightsOn(Long minutesLightsOn){
+        this.minutesLightsOn = minutesLightsOn;
+    }
+
+    public String getGroupExperiment(){
+        return this.groupExperiment;
+    }
+
+    public void setGroupExperiment(String groupExperiment) {
+        this.groupExperiment = groupExperiment;
+    }
+
+    public Integer getIntruderOccurrences() {
+        return intruderOccurrences;
+    }
+
+    public void setIntruderOccurrences(Integer intruderOccurrences) {
+        this.intruderOccurrences = intruderOccurrences;
+    }
 
     @Override
     public boolean equals(Object o) {

@@ -16,7 +16,7 @@ class HouseState(object):
       '''
       self.__door = True
       self.__light = True
-      self.__proximity = False
+      self.__proximity = True
       self.__alarm_active = False
       self.__alarm_state = False
       self.__chiller_state = False
