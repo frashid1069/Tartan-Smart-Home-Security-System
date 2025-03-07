@@ -78,26 +78,30 @@ jobs:
         run: |
           docker-compose -f smart-home/docker-compose.yml push
 
-  deploy:
-    runs-on: ubuntu-latest
-    needs: build-and-push-docker
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+  # deploy:
+  #   runs-on: ubuntu-latest
+  #   needs: build-and-push-docker
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v3
 
-      - name: Install SSH key from .pem file
-        run: |
-          echo "${{ secrets.SSH_PEM_KEY }}" > deploy-key.pem
-          chmod 600 deploy-key.pem
+  #     - name: Test IPv6 connectivity
+  #       run: |
+  #         ping6 -c 4 ${{ secrets.SSH_HOST }}
+  #     - name: Install SSH key from .pem file
+  #       run: |
+  #         # Save the .pem file content to a file
+  #         echo "${{ secrets.SSH_PEM_KEY }}" > deploy-key.pem
+  #         # Set correct permissions for the .pem file
+  #         chmod 600 deploy-key.pem
 
-      - name: Deploy to VM via Bastion
-        run: |
-          ssh -o StrictHostKeyChecking=no \
-              -i deploy-key.pem \
-              -J bastion-user@<bastion-ipv4> \
-              ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
-          cd /path/to/your/project
-          git pull origin main
-          docker-compose down
-          docker-compose up -d
-          EOF
+  #     - name: Deploy to VM using IPv6
+  #       run: |
+  #         ssh -o StrictHostKeyChecking=no \
+  #             -i deploy-key.pem \
+  #             ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+  #         cd /path/to/your/project
+  #         git pull origin main
+  #         docker-compose down
+  #         docker-compose up -d
+  #         EOF
