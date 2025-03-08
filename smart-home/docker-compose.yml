@@ -25,6 +25,30 @@ services:
         max-size: "10m"
         max-file: "3"
 
+  house-us1:
+    build: HouseSimulator/
+    ports:
+     - "5052:5050"
+    networks:
+      - app-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  house-us2:
+    build: HouseSimulator/
+    ports:
+     - "5053:5050"
+    networks:
+      - app-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
   platform:
     build:
       context: Platform/
@@ -35,6 +59,10 @@ services:
       house-cmu:
         condition: service_started
       house-mse:
+        condition: service_started
+      house-us1:
+        condition: service_started
+      house-us2:
         condition: service_started
     ports:
       - "8080:8080"
@@ -55,7 +83,7 @@ services:
       MYSQL_USER: user
       MYSQL_PASSWORD: password
     ports:
-      - "3306:3306"
+     - "3306:3306"
     volumes:
       - mysql-storage:/var/lib/mysql
     networks:

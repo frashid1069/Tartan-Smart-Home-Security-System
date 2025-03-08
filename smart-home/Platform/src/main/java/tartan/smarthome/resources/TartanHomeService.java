@@ -12,9 +12,14 @@ import tartan.smarthome.core.TartanHomeData;
 import tartan.smarthome.core.TartanHomeValues;
 import tartan.smarthome.db.HomeDAO;
 
+import java.time.LocalTime;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalUnit;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
+import java.util.*;
 
 /***
  * The service layer for the Tartan Home System. Additional inputs and control mechanisms should be accessed here.
@@ -34,11 +39,21 @@ public class TartanHomeService {
     private Integer port;
     private String alarmDelay;
     private String alarmPasscode;
+    private String doorLockPasscode;
     private String targetTemp;
     private String nightStart;
     private String nightEnd;
     private String user;
     private String password;
+
+    // AB Testing parameters -- lights
+    private String groupExperiment;
+    private boolean prevLightState;
+    private LocalTime timeLightMinutesUpdated;
+    private Long lightsOnDuration;
+    private Integer intruderOccurrences;
+    private Boolean prevIntruderState;
+    private Map<LocalDate, Long> pastLightUsage; // Store daily usage
 
     // status parameters
     private HomeDAO homeDAO;
@@ -70,12 +85,22 @@ public class TartanHomeService {
         this.port = settings.getPort();
         this.authenticated = false;
 
+        // Ab Testing
+        this.groupExperiment = settings.getGroupExperiment();
+        this.timeLightMinutesUpdated = LocalTime.now();
+        this.lightsOnDuration = 0L;
+        this.prevLightState = true;
+        this.intruderOccurrences = 0;
+        this.prevIntruderState = false;
+        this.pastLightUsage = new HashMap<>();
+
         // User configuration
         this.targetTemp = settings.getTargetTemp();
         this.nightStart = settings.getNightStart();
         this.nightEnd = settings.getNightEnd();
         this.alarmDelay = settings.getAlarmDelay();
         this.alarmPasscode = settings.getAlarmPasscode();
+        this.doorLockPasscode = settings.getDoorLockPasscode();
 
         this.historyTimer = historyTimer*1000;
         this.logHistory = true;
@@ -92,6 +117,7 @@ public class TartanHomeService {
         userSettings.put(IoTValues.NIGHT_START, Integer.parseInt(this.nightStart));
         userSettings.put(IoTValues.NIGHT_END, Integer.parseInt(this.nightEnd));
         userSettings.put(IoTValues.ALARM_PASSCODE, this.alarmPasscode);
+        userSettings.put(IoTValues.DOOR_LOCK_PASSCODE, this.doorLockPasscode);
         controller.updateSettings(userSettings);
 
         LOGGER.info("House " + this.name + " configured");
@@ -232,6 +258,15 @@ public class TartanHomeService {
     }
 
     /**
+     * Convert door lock passcode
+     * @param tartanHome the home
+     * @return the passcode
+     */
+    private String toIoTDoorLockPasscode(TartanHome tartanHome) {
+        return tartanHome.getDoorLockPasscode();
+    }
+
+    /**
      * Convert door state
      * @param tartanHome the home
      * @return true if open; false if closed' otherwise null
@@ -363,7 +398,11 @@ public class TartanHomeService {
                 userSettings.put(IoTValues.NIGHT_END, Integer.parseInt(this.nightEnd));
             } 
             controller.updateSettings(userSettings);  
-            controller.processStateUpdate(toIotState(h));  
+            controller.processStateUpdate(toIotState(h));
+            LocalDate today = LocalDate.now();
+            if (!h.getPastLightUsage().containsKey(today)) {
+                h.getPastLightUsage().put(today, 0L);  // Ensure key exists
+            }
         }
         return true;
     }
@@ -383,6 +422,15 @@ public class TartanHomeService {
         tartanHome.setNightStart(this.nightStart);
         tartanHome.setNightEnd(this.nightEnd);
         tartanHome.setAlarmDelay(this.alarmDelay);
+
+        LocalDate today = LocalDate.now();
+        if (!tartanHome.getPastLightUsage().containsKey(today)) {
+            tartanHome.getPastLightUsage().put(today, 0L);  // Ensure key exists
+        }
+
+        tartanHome.setGroupExperiment(this.groupExperiment);
+        tartanHome.setMinutesLightsOn(this.lightsOnDuration);
+        tartanHome.setPastLightUsage(this.pastLightUsage);
 
         tartanHome.setEventLog(controller.getLogMessages());
         tartanHome.setAuthenticated(String.valueOf(this.authenticated));
@@ -461,8 +509,30 @@ public class TartanHomeService {
             }else if (key.equals(IoTValues.LIGHT_STATE)) {
                 Boolean lightState = (Boolean)state.get(key);
                 if (lightState) {
+                    if (this.prevLightState != lightState) {
+                        this.timeLightMinutesUpdated = LocalTime.now();
+                    } else {
+                        LocalTime now = LocalTime.now();
+                        Long diff = this.timeLightMinutesUpdated.until(now, ChronoUnit.MILLIS);
+                        this.timeLightMinutesUpdated = now;
+                        this.lightsOnDuration += diff;
+                    }
+                    this.prevLightState = lightState;
+                    tartanHome.setMinutesLightsOn(this.lightsOnDuration);
                     tartanHome.setLight(TartanHomeValues.ON);
+                    today = LocalDate.now();
+                    tartanHome.getPastLightUsage().put(today, this.lightsOnDuration);
                 } else {
+                    if (this.prevLightState != lightState){
+                        LocalTime now = LocalTime.now();
+                        Long diff = this.timeLightMinutesUpdated.until(now, ChronoUnit.MILLIS);
+                        this.timeLightMinutesUpdated = now;
+                        this.lightsOnDuration += diff;
+                    }
+                    today = LocalDate.now();
+                    tartanHome.getPastLightUsage().put(today, this.lightsOnDuration);
+                    this.prevLightState = lightState;
+                    tartanHome.setMinutesLightsOn(this.lightsOnDuration);
                     tartanHome.setLight(TartanHomeValues.OFF);
                 }
             } else if (key.equals(IoTValues.PROXIMITY_STATE)) {
@@ -489,10 +559,15 @@ public class TartanHomeService {
             } else if (key.equals(IoTValues.INTRUDER_STATE)) {
                     Boolean intruderState = (Boolean)state.get(key);
                     if (intruderState) {
+                        if(!prevIntruderState) {
+                            intruderOccurrences += 1;
+                        }
                         tartanHome.setIntruderState(TartanHomeValues.DETECTED);
                     } else {
                         tartanHome.setIntruderState(TartanHomeValues.CLEAR);
                     }
+                    prevIntruderState = intruderState;
+                    tartanHome.setIntruderOccurrences(intruderOccurrences);
             } else if (key.equals(IoTValues.PHONE_PROXIMITY)){
                 Boolean phoneProximity = (Boolean) state.get(key);
                 if(phoneProximity){
@@ -574,6 +649,9 @@ public class TartanHomeService {
                 {put(IoTValues.ALARM_DELAY,Integer.parseInt(TartanHomeService.this.alarmDelay));}
             };
             controller.updateSettings(ht);
+        }
+        if (tartanHome.getDoorLockPasscode()!=null) {
+            state.put(IoTValues.GIVEN_DOOR_LOCK_PASSCODE, toIoTDoorLockPasscode(tartanHome));
         }
 
         if (tartanHome.getHvacMode()!=null) {

@@ -41,6 +41,34 @@ houses:
     alarmPasscode: quit
     doorLockPasscode: open
 
+    # Next house
+  - name: us1
+    address: localhost
+    port: 5052
+
+    user: admin
+    password: 1235
+    targetTemp: 70
+    nightStart: 0000
+    nightEnd: 0000
+    alarmDelay: 30
+    alarmPasscode: quit
+    doorLockPasscode: open
+
+  - # Next house
+    name: us2
+    address: localhost
+    port: 5053
+
+    user: admin
+    password: 1236
+    targetTemp: 70
+    nightStart: 0000
+    nightEnd: 0000
+    alarmDelay: 30
+    alarmPasscode: quit
+    doorLockPasscode: open
+
 # how many seconds between database snapshots
 historyTimer: 5
 
