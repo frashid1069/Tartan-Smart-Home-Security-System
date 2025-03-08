@@ -117,9 +117,10 @@ jobs:
           echo "${{ secrets.SSH_PEM_KEY }}" > deploy-key.pem
           chmod 600 deploy-key.pem
 
-      - name: Test IPv6 connectivity
+      - name: Check IPv6 Connectivity
         run: |
-          curl -g --verbose --connect-timeout 5 "[${{ secrets.SSH_HOST }}]"
+          ip -6 addr show
+          ping6 -c 4 google.com || echo "GitHub Actions doesn't have IPv6"
 
       - name: Deploy to VM using SSH
         run: |
