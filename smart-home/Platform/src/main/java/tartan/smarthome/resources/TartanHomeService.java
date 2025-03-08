@@ -13,11 +13,13 @@ import tartan.smarthome.core.TartanHomeValues;
 import tartan.smarthome.db.HomeDAO;
 
 import java.time.LocalTime;
+import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalUnit;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
+import java.util.*;
 
 /***
  * The service layer for the Tartan Home System. Additional inputs and control mechanisms should be accessed here.
@@ -51,6 +53,7 @@ public class TartanHomeService {
     private Long lightsOnDuration;
     private Integer intruderOccurrences;
     private Boolean prevIntruderState;
+    private Map<LocalDate, Long> pastLightUsage; // Store daily usage
 
     // status parameters
     private HomeDAO homeDAO;
@@ -89,6 +92,7 @@ public class TartanHomeService {
         this.prevLightState = true;
         this.intruderOccurrences = 0;
         this.prevIntruderState = false;
+        this.pastLightUsage = new HashMap<>();
 
         // User configuration
         this.targetTemp = settings.getTargetTemp();
@@ -394,7 +398,11 @@ public class TartanHomeService {
                 userSettings.put(IoTValues.NIGHT_END, Integer.parseInt(this.nightEnd));
             } 
             controller.updateSettings(userSettings);  
-            controller.processStateUpdate(toIotState(h));  
+            controller.processStateUpdate(toIotState(h));
+            LocalDate today = LocalDate.now();
+            if (!h.getPastLightUsage().containsKey(today)) {
+                h.getPastLightUsage().put(today, 0L);  // Ensure key exists
+            }
         }
         return true;
     }
@@ -415,8 +423,14 @@ public class TartanHomeService {
         tartanHome.setNightEnd(this.nightEnd);
         tartanHome.setAlarmDelay(this.alarmDelay);
 
+        LocalDate today = LocalDate.now();
+        if (!tartanHome.getPastLightUsage().containsKey(today)) {
+            tartanHome.getPastLightUsage().put(today, 0L);  // Ensure key exists
+        }
+
         tartanHome.setGroupExperiment(this.groupExperiment);
         tartanHome.setMinutesLightsOn(this.lightsOnDuration);
+        tartanHome.setPastLightUsage(this.pastLightUsage);
 
         tartanHome.setEventLog(controller.getLogMessages());
         tartanHome.setAuthenticated(String.valueOf(this.authenticated));
@@ -506,6 +520,8 @@ public class TartanHomeService {
                     this.prevLightState = lightState;
                     tartanHome.setMinutesLightsOn(this.lightsOnDuration);
                     tartanHome.setLight(TartanHomeValues.ON);
+                    today = LocalDate.now();
+                    tartanHome.getPastLightUsage().put(today, this.lightsOnDuration);
                 } else {
                     if (this.prevLightState != lightState){
                         LocalTime now = LocalTime.now();
@@ -513,6 +529,8 @@ public class TartanHomeService {
                         this.timeLightMinutesUpdated = now;
                         this.lightsOnDuration += diff;
                     }
+                    today = LocalDate.now();
+                    tartanHome.getPastLightUsage().put(today, this.lightsOnDuration);
                     this.prevLightState = lightState;
                     tartanHome.setMinutesLightsOn(this.lightsOnDuration);
                     tartanHome.setLight(TartanHomeValues.OFF);

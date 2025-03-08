@@ -99,6 +99,7 @@ public class TartanHomeData {
     @Column(name = "intruder_occurrences")
     private Integer intruderOccurrences;
 
+
     /**
      * Create a mew data set from a TartanHome model
      * @param h the home model

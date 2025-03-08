@@ -3,6 +3,8 @@ package tartan.smarthome.core;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 import java.util.Objects;
+import java.time.LocalDate;
+import java.util.*;
 
 /**
  * The mode for a Tartan Home to be serialized as JSON. This is managed by Jackson via Dropwizard.
@@ -101,6 +103,9 @@ public class TartanHome {
 
     @JsonProperty
     private Long minutesLightsOn;
+
+    @JsonProperty
+    private Map<LocalDate, Long> pastLightUsage = new HashMap<>();
 
     @JsonProperty
     private Integer intruderOccurrences;
@@ -433,7 +438,7 @@ public class TartanHome {
     public void setDoorLockState(String doorLockState) { this.doorLockState = doorLockState; }
 
     public Long getMinutesLightsOn(){
-        return minutesLightsOn;
+        return this.minutesLightsOn;
     }
 
     public void setMinutesLightsOn(Long minutesLightsOn){
@@ -446,6 +451,14 @@ public class TartanHome {
 
     public void setGroupExperiment(String groupExperiment) {
         this.groupExperiment = groupExperiment;
+    }
+
+    public Map<LocalDate, Long> getPastLightUsage() {
+        return pastLightUsage;
+    }
+
+    public void setPastLightUsage(Map<LocalDate, Long> pastLightUsage) {
+        this.pastLightUsage = pastLightUsage;
     }
 
     public Integer getIntruderOccurrences() {

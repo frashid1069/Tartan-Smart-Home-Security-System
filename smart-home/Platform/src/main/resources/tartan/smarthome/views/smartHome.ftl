@@ -244,10 +244,40 @@ div {
         <strong>Device status: <font color="red"> ${tartanHome.phoneProximity}</font></strong>
     </p>
     <hr>
-    <#if tartanHome.groupExperiment == "lights">
-        <h3>Report<h3>
-        <strong>Lights on Duration: ${tartanHome.minutesLightsOn/(60*1000)%60} minutes, ${tartanHome.minutesLightsOn/1000 % 60} seconds</strong>
-    </#if>
+
+    <div id="weekly_report">
+        <h3>Weekly Report</h3>
+        <p><strong>Group: ${tartanHome.groupExperiment}</strong></p>
+        <#if tartanHome.groupExperiment == "lights">
+            <p>Total Light Usage: ${tartanHome.minutesLightsOn/(60*1000) % 60} minutes, ${tartanHome.minutesLightsOn/1000 % 60} seconds</p>
+            <p><strong>Report Type:</strong> Time-based reporting</p>
+        <#else>
+            <p>Total electricity bill: ${tartanHome.minutesLightsOn/(60*1000) * 0.05} CAD</p>
+            <p><strong>Report Type:</strong> Cost-based reporting</p>
+        </#if>
+    </div>
+
+    <h3>Light Usage Over Time</h3>
+    <table border="1">
+        <thead>
+        <tr>
+            <th>Date</th>
+            <th>Light Usage (minutes)</th>
+        </tr>
+        </thead>
+        <tbody>
+        <#if tartanHome.pastLightUsage??>  <!-- Ensure pastLightUsage is not null -->
+            <#list tartanHome.pastLightUsage?keys as date>
+                <tr>
+                    <td>${date}</td>
+                    <td>${tartanHome.pastLightUsage[date]!0 / (60 * 1000) % 60} minutes, ${tartanHome.pastLightUsage[date]!0 / 1000 % 60} seconds</td>
+                </tr>
+            </#list>
+        <#else>
+            <p>No past light usage data available.</p>
+        </#if>
+        </tbody>
+    </table>
     <hr>
     <h3> Event log</h3>
     <textarea id="log" rows="15" cols="150">
