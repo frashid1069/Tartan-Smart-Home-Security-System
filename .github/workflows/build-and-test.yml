@@ -119,7 +119,7 @@ jobs:
 
       - name: Test IPv6 connectivity
         run: |
-          ping6 -c 4 ${{ secrets.SSH_HOST }}
+          curl -g --verbose --connect-timeout 5 "[${{ secrets.SSH_HOST }}]"
 
       - name: Deploy to VM using SSH
         run: |
