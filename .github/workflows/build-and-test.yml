@@ -77,6 +77,33 @@ jobs:
         run: |
           docker-compose -f smart-home/docker-compose.yml push
 
+  # deploy:
+  #   runs-on: ubuntu-latest
+  #   needs: build-and-push-docker
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v3
+
+  #     - name: Test IPv6 connectivity
+  #       run: |
+  #         ping6 -c 4 ${{ secrets.SSH_HOST }}
+  #     - name: Install SSH key from .pem file
+  #       run: |
+  #         # Save the .pem file content to a file
+  #         echo "${{ secrets.SSH_PEM_KEY }}" > deploy-key.pem
+  #         # Set correct permissions for the .pem file
+  #         chmod 600 deploy-key.pem
+
+  #     - name: Deploy to VM using IPv6
+  #       run: |
+  #         ssh -o StrictHostKeyChecking=no \
+  #             -i deploy-key.pem \
+  #             ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+  #         cd /path/to/your/project
+  #         git pull origin main
+  #         docker-compose down
+  #         docker-compose up -d
+  #         EOF
 
   deploy:
     runs-on: ubuntu-latest
@@ -90,17 +117,16 @@ jobs:
           echo "${{ secrets.SSH_PEM_KEY }}" > deploy-key.pem
           chmod 600 deploy-key.pem
 
-      - name: Deploy to Cybera VM
+      - name: Check IPv6 Connectivity
+        run: |
+          ip -6 addr show
+          ping6 -c 4 google.com || echo "GitHub Actions doesn't have IPv6"
+
+      - name: Deploy to VM using SSH
         run: |
           ssh -o StrictHostKeyChecking=no -i deploy-key.pem ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
-            # Clone the repository if not already cloned
-            if [ ! -d "402-group-project-h01-group13" ]; then
-              git clone https://github.com/cmput402-w25/402-group-project-h01-group13.git 
-            fi
-
-            # Change to project directory
-            cd 402-group-project-h01-group13
-
-            # Run deployment script to fetch and run containers
-            ./deployment.sh latest
+            cd /path/to/your/project
+            git pull origin main
+            docker-compose down
+            docker-compose up -d
           EOF
