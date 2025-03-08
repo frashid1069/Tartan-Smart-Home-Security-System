@@ -3,6 +3,8 @@ package tartan.smarthome.core;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 import java.util.Objects;
+import java.time.LocalDate;
+import java.util.*;
 
 /**
  * The mode for a Tartan Home to be serialized as JSON. This is managed by Jackson via Dropwizard.
@@ -95,6 +97,18 @@ public class TartanHome {
 
     @JsonProperty
     private String doorLockPasscode;
+
+    @JsonProperty
+    private String groupExperiment;
+
+    @JsonProperty
+    private Long minutesLightsOn;
+
+    @JsonProperty
+    private Map<LocalDate, Long> pastLightUsage = new HashMap<>();
+
+    @JsonProperty
+    private Integer intruderOccurrences;
 
     /**
      * Empty constructor needed by Jackson deserialization
@@ -422,6 +436,38 @@ public class TartanHome {
      * @param doorLockState the state
      */
     public void setDoorLockState(String doorLockState) { this.doorLockState = doorLockState; }
+
+    public Long getMinutesLightsOn(){
+        return this.minutesLightsOn;
+    }
+
+    public void setMinutesLightsOn(Long minutesLightsOn){
+        this.minutesLightsOn = minutesLightsOn;
+    }
+
+    public String getGroupExperiment(){
+        return this.groupExperiment;
+    }
+
+    public void setGroupExperiment(String groupExperiment) {
+        this.groupExperiment = groupExperiment;
+    }
+
+    public Map<LocalDate, Long> getPastLightUsage() {
+        return pastLightUsage;
+    }
+
+    public void setPastLightUsage(Map<LocalDate, Long> pastLightUsage) {
+        this.pastLightUsage = pastLightUsage;
+    }
+
+    public Integer getIntruderOccurrences() {
+        return intruderOccurrences;
+    }
+
+    public void setIntruderOccurrences(Integer intruderOccurrences) {
+        this.intruderOccurrences = intruderOccurrences;
+    }
 
     @Override
     public boolean equals(Object o) {
