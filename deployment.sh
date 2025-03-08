@@ -23,7 +23,7 @@ elif [ "$1" == "rollback-service" ]; then
         exit 1
     fi
     echo "Rolling back service $2..."
-    docker-compose down "$2"
+    docker-compose stop "$2"
     docker-compose pull "$2"
     docker-compose up -d "$2"
     echo "Rollback for service $2 completed!"
