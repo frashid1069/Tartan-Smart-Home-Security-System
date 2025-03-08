@@ -69,22 +69,13 @@ jobs:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
-      - name: Set Docker Hub Username in Env
-        run: |
-          echo "DOCKERHUB_USERNAME=${{ secrets.DOCKER_HUB_USERNAME }}" >> $GITHUB_ENV
-
-      - name: Substitute environment variable in docker-compose.yml
-        run: |
-          envsubst < smart-home/docker-compose.yml > smart-home/docker-compose.generated.yml
-
       - name: Build Docker images
         run: |
-          docker-compose -f smart-home/docker-compose.generated.yml build
-          docker tag ${DOCKERHUB_USERNAME}/platform:latest ${DOCKERHUB_USERNAME}/platform:previous
+          docker-compose -f smart-home/docker-compose.yml build
 
       - name: Push Docker images
         run: |
-          docker-compose -f smart-home/docker-compose.generated.yml push
+          docker-compose -f smart-home/docker-compose.yml push
 
   # deploy:
   #   runs-on: ubuntu-latest

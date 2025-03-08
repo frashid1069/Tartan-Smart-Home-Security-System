@@ -1,7 +1,6 @@
-version: '3'
 services:
   house-cmu:
-    image: ${DOCKERHUB_USERNAME}/house-cmu:latest
+    build: HouseSimulator/
     ports:
       - "5051:5050"
     networks:
@@ -14,7 +13,7 @@ services:
         max-file: "3"
 
   house-mse:
-    image: ${DOCKERHUB_USERNAME}/house-mse:latest
+    build: HouseSimulator/
     ports:
       - "5050:5050"
     networks:
@@ -27,7 +26,9 @@ services:
         max-file: "3"
 
   platform:
-    image: ${DOCKERHUB_USERNAME}/platform:latest
+    build:
+      context: Platform/
+      no_cache: true
     depends_on:
       mysql-container:
         condition: service_healthy
@@ -47,7 +48,7 @@ services:
         max-file: "3"
 
   mysql-container:
-    image: ${DOCKERHUB_USERNAME}/mysql-container:latest
+    build: Database/
     environment:
       MYSQL_ROOT_PASSWORD: rootpassword
       MYSQL_DATABASE: mydb

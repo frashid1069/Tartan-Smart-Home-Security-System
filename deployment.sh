@@ -12,7 +12,7 @@ elif [ "$1" == "rollback" ]; then
     ROLLBACK_VERSION="${2:-previous}"
     echo "Rolling back to version: $ROLLBACK_VERSION..."
     docker-compose down
-    docker-compose pull "${DOCKERHUB_USERNAME}/platform:${ROLLBACK_VERSION}"
+    docker-compose pull "platform:${ROLLBACK_VERSION}"
     docker-compose up -d
     echo "Rollback to version $ROLLBACK_VERSION successful!"
 
