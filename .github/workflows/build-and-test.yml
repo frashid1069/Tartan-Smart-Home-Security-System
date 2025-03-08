@@ -98,8 +98,10 @@ jobs:
               git clone https://github.com/cmput402-w25/402-group-project-h01-group13.git 
             fi
 
-            # Change to project directory
+            # Change to project directory and add necessary permissions
             cd 402-group-project-h01-group13
+            cd smart-home
+            chmod +x ./deployment.sh
 
             # Run deployment script to fetch and run containers
             ./deployment.sh latest
