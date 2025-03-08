@@ -80,10 +80,7 @@ jobs:
       - name: Build Docker images
         run: |
           docker-compose -f smart-home/docker-compose.generated.yml build
-
-      - name: Tag Docker images with 'latest' and 'previous'
-        run: |
-          docker tag smart-home_platform:latest smart-home_platform:previous
+          docker tag ${DOCKERHUB_USERNAME}/platform:latest ${DOCKERHUB_USERNAME}/platform:previous
 
       - name: Push Docker images
         run: |
