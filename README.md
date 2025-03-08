@@ -97,3 +97,5 @@ For more details, check the `deployment.sh` file and **GitHub Actions** workflow
 To allow the deployment to run on the Cybera VM, you need to ensure that the server has an SSH key set up to authenticate the GitHub Actions runner:
 - The SSH key is stored in GitHub Secrets (`SSH_PEM_KEY`), and the key is used to authenticate the connection to the target server.
 
+
+### NOTE: When we deploy locally in the cybera instance it works fine. However, when we try to automate it using GitHub Actions, there is a connection error and the process terminates with some error code.
