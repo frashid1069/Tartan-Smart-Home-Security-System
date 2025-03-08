@@ -1,62 +1,77 @@
 version: '3'
 services:
-  house-cmu: 
+  house-cmu:
     build: HouseSimulator/
     ports:
-     - "5051:5050"
-  house-mse: 
+      - "5051:5050"
+    networks:
+      - app-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  house-mse:
     build: HouseSimulator/
     ports:
-     - "5050:5050"
+      - "5050:5050"
+    networks:
+      - app-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
   platform:
     build:
       context: Platform/
       no_cache: true
     depends_on:
-     - "mysql-container"
-     - "house-cmu"
-     - "house-mse"
+      mysql-container:
+        condition: service_healthy
+      house-cmu:
+        condition: service_started
+      house-mse:
+        condition: service_started
     ports:
-     - "8080:8080"
+      - "8080:8080"
+    networks:
+      - app-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
   mysql-container:
     build: Database/
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: mydb
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
     ports:
-     - "3306:3306"
+      - "3306:3306"
     volumes:
-     - mysql-storage:/var/lib/mysql
-
+      - mysql-storage:/var/lib/mysql
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
 volumes:
   mysql-storage:
 
-
-version: '3'
-services:
-  house-cmu: 
-    build: HouseSimulator/
-    ports:
-     - "5051:5050"
-  house-mse: 
-    build: HouseSimulator/
-    ports:
-     - "5050:5050"
-  platform:
-    build:
-      context: Platform/
-      no_cache: true
-    depends_on:
-     - "mysql-container"
-     - "house-cmu"
-     - "house-mse"
-    ports:
-     - "8080:8080"
-  mysql-container:
-    build: Database/
-    ports:
-     - "3306:3306"
-    volumes:
-     - mysql-storage:/var/lib/mysql
-
-
-volumes:
-  mysql-storage:
+networks:
+  app-network:
+    driver: bridge
