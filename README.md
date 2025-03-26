@@ -1,13 +1,12 @@
-# Group 13 - Lab H01
 ## Members:
 
-#### Armaan Das (adas5)
+#### Armaan Das
 
-#### Farhan Rashid (frashid2)
+#### Farhan Rashid
 
-#### Lingfeng Zhu (lingfen1)
+#### Lingfeng Zhu
 
-#### Michael Shi (wenjian2)
+#### Michael Shi
 
 
 # Tartan
